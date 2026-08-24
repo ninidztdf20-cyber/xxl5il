@@ -826,6 +826,46 @@ function checkBadges(score, correct, total){
  let newBadge=null;
  if(correct===total && total>=5 && !badges.includes('perfect')){badges.push('perfect');newBadge='🌟 إجابة مثالية!';}
  else if(correct===total && total>=3 && !badges.includes('firstWin')){badges.push('firstWin');newBadge='🏅 أول انتصار!';}
+ else if(correct>=10 && !badges.includes('streconst countryNames = {'SA':'🇸🇦','EG':'🇪🇬','DZ':'🇩🇿','MA':'🇲🇦','TN':'🇹🇳','LY':'🇱🇾','SD':'🇸🇩','SY':'🇸🇾','IQ':'🇮🇶','JO':'🇯🇴','PS':'🇵🇸','LB':'🇱🇧','KW':'🇰🇼','QA':'🇶🇦','AE':'🇦🇪','OM':'🇴🇲','BH':'🇧🇭','YE':'🇾🇪','TR':'🇹🇷','IR':'🇮🇷','PK':'🇵🇰','IN':'🇮🇳','ID':'🇮🇩','MY':'🇲🇾','US':'🇺🇸','UK':'🇬🇧','FR':'🇫🇷','DE':'🇩🇪'};
+ document.getElementById("profCountry").textContent = p.country ? countryNames[p.country]||'🌍' : '';
+ document.getElementById("topAvatar").textContent = p.age<15?"🧒":p.age<25?"👦":"👨";
+ document.getElementById("profAvatar").textContent = p.age<15?"🧒":p.age<25?"👦":"👨";
+ const lvl=Math.max(1,Math.floor(p.xp/300)+1);
+ document.getElementById("profLevel").textContent=lvl;
+ const cur=p.xp%300;
+ document.getElementById("xpFill").style.width=(cur/300*100)+"%";
+ document.getElementById("xpNow").textContent=cur+" XP";
+ document.getElementById("xpNext").textContent="300 XP";
+ document.getElementById("statGames").textContent=p.games||0;
+ document.getElementById("statAcc").textContent=p.correctPct==null?"—":p.correctPct+"%";
+ document.getElementById("statStreak").textContent=p.bestStreak||0;
+ document.getElementById("topStreak").textContent=p.bestStreak||0;
+ document.getElementById("streakDays").textContent=p.bestStreak||0;
+ updateBadges(p.badges||[]);
+}
+
+function updateBadges(badges){
+ const names = {'firstWin':'أول انتصار','streak10':'10 متتالية','q100':'100 سؤال','quick':'إجابة سريعة','perfect':'إجابة مثالية'};
+ document.querySelectorAll('#badgesRow div').forEach(el=>{
+   const b = el.dataset.badge;
+   if(badges.includes(b)){
+     el.classList.add('unlocked');
+     el.classList.remove('locked');
+     el.title = '✅ '+names[b];
+   } else {
+     el.classList.add('locked');
+     el.classList.remove('unlocked');
+     el.title = '🔒 '+names[b]+' (لم يُفتح بعد)';
+   }
+ });
+}
+
+function checkBadges(score, correct, total){
+ const p=getProfile();
+ const badges=p.badges||[];
+ let newBadge=null;
+ if(correct===total && total>=5 && !badges.includes('perfect')){badges.push('perfect');newBadge='🌟 إجابة مثالية!';}
+ else if(correct===total && total>=3 && !badges.includes('firstWin')){badges.push('firstWin');newBadge='🏅 أول انتصار!';}
  else if(correct>=10 && !badges.includes('streak10')){badges.push('streak10');newBadge='🔥 10 إجابات متتالية!';}
  else if(p.games>=3 && p.games%3===0 && !badges.includes('q100')){badges.push('q100');newBadge='🕌 100 سؤال!';}
  else if(time<3 && correct>=3 && !badges.includes('quick')){badges.push('quick');newBadge='⚡ إجابة سريعة جداً!';}
@@ -1248,4 +1288,3 @@ document.getElementById("notifCount").textContent = getParticipants().length > 0
 </script>
 </body>
 </html>
-```
