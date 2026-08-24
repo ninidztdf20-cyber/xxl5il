@@ -1,1764 +1,831 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#070107">
-<meta name="description" content="A little something, for xxl5il.">
-<title>For You — xxl5il</title>
-
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23ff3150' d='M16 28S3 20 3 11.5A6.5 6.5 0 0 1 16 8a6.5 6.5 0 0 1 13 3.5C29 20 16 28 16 28Z'/%3E%3C/svg%3E">
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مسابقة السيرة النبوية ﷺ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Amiri:ital@0;1&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">
 <style>
+/* ===== Design tokens ===== */
 :root{
-  --bg:#070107;
-  --bg2:#17050d;
-  --bg3:#260813;
-  --wine:#4a0e1c;
-  --red:#e0263f;
-  --red2:#ff3150;
-  --pink:#ff7186;
-  --gold:#d9b083;
-  --cream:#f7ece7;
-  --muted:rgba(247,236,231,.62);
-  --line:rgba(217,176,131,.32);
+  --deep:#070f0c; --panel:#0e2019; --card:#112319; --card2:#0b1811;
+  --border:#24473b; --gold:#e8c477; --gold2:#c79a49; --ivory:#f3efe4;
+  --muted:#93a89c; --good:#3f8a5c; --bad:#a13f3f; --blue:#4a8db7;
 }
-
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#070107;
-  color:var(--cream);
-  font-family:Jost,sans-serif;
-}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Tajawal',Tahoma,Arial,sans-serif;background:var(--deep);color:var(--ivory);line-height:1.5}
+h1,h2,h3{font-family:'Amiri','Tajawal',serif;margin:0}
+.muted{color:var(--muted)}
+.wrap{max-width:1180px;margin:auto;padding:16px}
+a{color:inherit}
+button{font-family:inherit}
+.hidden{display:none!important}
+.hidden-important{display:none!important}
 
 body{
-  opacity:0;
-  transition:opacity 1.2s ease;
-}
-
-body.loaded{opacity:1}
-
-button,a{font:inherit}
-
-::selection{
-  background:rgba(255,49,80,.3);
-  color:#fff;
-}
-
-/* ================= BACKGROUND ================= */
-
-body::before{
-  content:"";
-  position:fixed;
-  inset:-30%;
-  z-index:-5;
   background:
-    radial-gradient(circle at 50% 38%,rgba(224,38,63,.19),transparent 25%),
-    radial-gradient(circle at 20% 80%,rgba(111,12,40,.15),transparent 28%),
-    radial-gradient(circle at 85% 20%,rgba(150,25,50,.1),transparent 25%);
-  animation:bgMove 12s ease-in-out infinite alternate;
-}
-
-@keyframes bgMove{
-  0%{transform:scale(1) rotate(0deg)}
-  100%{transform:scale(1.12) rotate(3deg)}
-}
-
-.grain{
-  position:fixed;
-  inset:-100px;
-  z-index:30;
-  pointer-events:none;
-  opacity:.045;
-  mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation:grain .15s steps(2) infinite;
-}
-
-@keyframes grain{
-  0%{transform:translate(0,0)}
-  25%{transform:translate(2%,-1%)}
-  50%{transform:translate(-1%,2%)}
-  75%{transform:translate(1%,1%)}
-  100%{transform:translate(-2%,-1%)}
-}
-
-.vignette{
-  position:fixed;
-  inset:0;
-  z-index:3;
-  pointer-events:none;
-  background:
-    radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.35) 75%,rgba(0,0,0,.82) 100%);
-}
-
-#stars{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-}
-
-/* ================= STAGE ================= */
-
-#stage{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-#heartCanvas{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  cursor:pointer;
-  z-index:1;
-}
-
-.center-glow{
-  position:absolute;
-  width:min(80vw,600px);
-  height:min(80vw,600px);
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(224,38,63,.15),transparent 68%);
-  filter:blur(30px);
-  pointer-events:none;
-  animation:glowPulse 2.8s ease-in-out infinite;
-}
-
-@keyframes glowPulse{
-  0%,100%{transform:scale(.92);opacity:.6}
-  50%{transform:scale(1.1);opacity:1}
-}
-
-/* ================= BRAND ================= */
-
-.brand{
-  position:absolute;
-  z-index:5;
-  top:15%;
-  text-align:center;
-  font-family:"Cormorant Garamond",serif;
-  font-size:clamp(38px,8vw,70px);
-  letter-spacing:.18em;
-  font-weight:500;
-  opacity:0;
-  transform:translateY(-15px);
-  transition:1.6s cubic-bezier(.2,.8,.2,1);
-  text-shadow:
-    0 0 20px rgba(255,49,80,.2),
-    0 0 60px rgba(255,49,80,.25);
-}
-
-.brand.show{
-  opacity:1;
-  transform:translateY(0);
-}
-
-.brand span{
-  color:var(--red2);
-}
-
-.brand::after{
-  content:"";
-  display:block;
-  width:45px;
-  height:1px;
-  margin:14px auto 0;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-}
-
-/* ================= PROMPT ================= */
-
-.prompt{
-  position:absolute;
-  z-index:5;
-  bottom:17%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-  color:var(--muted);
-  font-size:10px;
-  letter-spacing:.32em;
-  text-transform:uppercase;
-  opacity:0;
-  transition:1.2s ease;
-  pointer-events:none;
-}
-
-.prompt.show{opacity:1}
-
-.prompt-icon{
-  width:30px;
-  height:30px;
-  border:1px solid rgba(217,176,131,.3);
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:promptFloat 1.7s ease-in-out infinite;
-}
-
-@keyframes promptFloat{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(6px)}
-}
-
-/* ================= TOP BUTTON ================= */
-
-.sound-toggle{
-  position:absolute;
-  top:max(20px,env(safe-area-inset-top));
-  right:22px;
-  z-index:20;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:1px solid var(--line);
-  background:rgba(20,5,12,.45);
-  backdrop-filter:blur(15px);
-  color:var(--muted);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  opacity:0;
-  transition:.4s ease;
-}
-
-.sound-toggle.show{opacity:.85}
-
-.sound-toggle:hover{
-  color:var(--gold);
-  border-color:var(--gold);
-  box-shadow:0 0 25px rgba(217,176,131,.15);
-}
-
-.sound-toggle svg{
-  width:17px;
-}
-
-.sound-toggle.muted .waves{
-  opacity:.25;
-}
-
-.sound-toggle .slash{
-  display:none;
-}
-
-.sound-toggle.muted .slash{
-  display:block;
-}
-
-/* ================= PARTICLE COUNTER ================= */
-
-.status{
-  position:absolute;
-  bottom:28px;
-  z-index:5;
-  font-size:8px;
-  letter-spacing:.35em;
-  color:rgba(247,236,231,.18);
-  text-transform:uppercase;
-}
-
-/* ================= OVERLAY ================= */
-
-.overlay{
-  position:fixed;
-  inset:0;
-  z-index:50;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:
-    radial-gradient(circle at 50% 35%,rgba(90,5,25,.42),transparent 42%),
-    rgba(3,0,3,.78);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  opacity:0;
-  pointer-events:none;
-  transition:.8s cubic-bezier(.2,.8,.2,1);
-}
-
-.overlay.show{
-  opacity:1;
-  pointer-events:auto;
-}
-
-/* ================= EMBERS ================= */
-
-.embers{
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  pointer-events:none;
-}
-
-.ember{
-  position:absolute;
-  bottom:-20px;
-  width:3px;
-  height:3px;
-  border-radius:50%;
-  background:var(--pink);
-  box-shadow:
-    0 0 7px 2px rgba(255,90,114,.7),
-    0 0 18px rgba(224,38,63,.45);
-  opacity:0;
-  animation:rise linear infinite;
-}
-
-@keyframes rise{
-  0%{
-    transform:translate3d(0,0,0) scale(.4);
-    opacity:0;
-  }
-  10%{opacity:.9}
-  80%{opacity:.5}
-  100%{
-    transform:translate3d(var(--drift),-105vh,0) scale(1.3);
-    opacity:0;
-  }
-}
-
-/* ================= CARD ================= */
-
-.card-wrap{
-  width:min(100%,510px);
-  perspective:1600px;
-}
-
-.card{
-  position:relative;
-  width:100%;
-  padding:56px 38px 38px;
-  overflow:hidden;
-  text-align:center;
-
-  background:
-    linear-gradient(135deg,
-      rgba(255,255,255,.055),
-      rgba(255,255,255,.012) 35%,
-      rgba(120,10,35,.09));
-
-  border:1px solid rgba(217,176,131,.34);
-  border-radius:24px;
-
-  box-shadow:
-    0 40px 100px rgba(0,0,0,.65),
-    0 0 80px rgba(224,38,63,.12),
-    inset 0 1px 0 rgba(255,255,255,.07);
-
-  transform:
-    translateY(40px)
-    scale(.92)
-    rotateX(7deg);
-
-  opacity:0;
-
-  transition:
-    transform 1s cubic-bezier(.16,1,.3,1),
-    opacity .8s ease;
-
-  transform-style:preserve-3d;
-}
-
-.overlay.show .card{
-  opacity:1;
-  transform:translateY(0) scale(1) rotateX(0);
-}
-
-.card::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  pointer-events:none;
-  background:
-    linear-gradient(
-      115deg,
-      transparent 20%,
-      rgba(255,255,255,.13) 45%,
-      transparent 65%
-    );
-  transform:translateX(-120%);
-  animation:shine 5s ease-in-out 1.5s infinite;
-}
-
-@keyframes shine{
-  0%,55%{transform:translateX(-120%)}
-  75%,100%{transform:translateX(120%)}
-}
-
-.card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  border-radius:24px;
-  background:
-    radial-gradient(circle at 50% 0%,rgba(255,80,100,.12),transparent 40%);
-}
-
-.card.glow{
-  animation:cardBreath 3.5s ease-in-out infinite;
-}
-
-@keyframes cardBreath{
-  0%,100%{
-    box-shadow:
-      0 40px 100px rgba(0,0,0,.65),
-      0 0 65px rgba(224,38,63,.10),
-      inset 0 1px 0 rgba(255,255,255,.07);
-  }
-  50%{
-    box-shadow:
-      0 40px 100px rgba(0,0,0,.65),
-      0 0 100px rgba(224,38,63,.25),
-      inset 0 1px 0 rgba(255,255,255,.1);
-  }
-}
-
-/* corners */
-
-.corner{
-  position:absolute;
-  width:24px;
-  height:24px;
-  opacity:.6;
-}
-
-.corner::before,
-.corner::after{
-  content:"";
-  position:absolute;
-  background:var(--gold);
-}
-
-.tl{top:14px;left:14px}
-.tr{top:14px;right:14px}
-.bl{bottom:14px;left:14px}
-.br{bottom:14px;right:14px}
-
-.tl::before,.bl::before{
-  width:1px;
-  height:24px;
-  left:0;
-}
-.tr::before,.br::before{
-  width:1px;
-  height:24px;
-  right:0;
-}
-.tl::after,.tr::after{
-  height:1px;
-  width:24px;
-  top:0;
-}
-.bl::after,.br::after{
-  height:1px;
-  width:24px;
-  bottom:0;
-}
-
-/* close */
-
-.card-close{
-  position:absolute;
-  top:14px;
-  right:16px;
-  width:34px;
-  height:34px;
-  border-radius:50%;
-  border:1px solid rgba(217,176,131,.15);
-  background:rgba(0,0,0,.15);
-  color:var(--muted);
-  cursor:pointer;
-  font-size:21px;
-  transition:.35s ease;
-  z-index:5;
-}
-
-.card-close:hover{
-  color:#fff;
-  border-color:var(--gold);
-  transform:rotate(90deg);
-}
-
-/* ================= CONTENT ================= */
-
-.eyebrow{
-  position:relative;
-  z-index:2;
-  font-size:9px;
-  letter-spacing:.55em;
-  color:var(--gold);
-  text-transform:uppercase;
-  opacity:0;
-  transform:translateY(8px);
-  transition:1s ease .3s;
-}
-
-.card.reveal .eyebrow{
-  opacity:.85;
-  transform:none;
-}
-
-.phrase{
-  position:relative;
-  z-index:2;
-  margin:18px auto 0;
-  font-family:"Cormorant Garamond",serif;
-  font-size:clamp(26px,5vw,38px);
-  line-height:1.38;
-  font-weight:500;
-  color:var(--cream);
-  opacity:0;
-  filter:blur(10px);
-  transform:translateY(20px);
-  transition:
-    opacity 1.3s ease .45s,
-    filter 1.3s ease .45s,
-    transform 1.3s cubic-bezier(.2,.8,.2,1) .45s;
-  text-shadow:0 0 40px rgba(224,38,63,.16);
-}
-
-.card.reveal .phrase{
-  opacity:1;
-  filter:blur(0);
-  transform:none;
-}
-
-.phrase .word{
-  display:inline-block;
-  opacity:0;
-  transform:translateY(10px);
-}
-
-.card.reveal .phrase .word{
-  animation:wordIn .7s cubic-bezier(.2,.8,.2,1) forwards;
-}
-
-@keyframes wordIn{
-  to{
-    opacity:1;
-    transform:none;
-  }
-}
-
-.divider{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  margin:24px auto 0;
-  opacity:0;
-  transition:1s ease 1s;
-}
-
-.card.reveal .divider{opacity:.75}
-
-.divider::before,
-.divider::after{
-  content:"";
-  width:40px;
-  height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold));
-}
-
-.divider::after{
-  background:linear-gradient(90deg,var(--gold),transparent);
-}
-
-.divider span{
-  width:4px;
-  height:4px;
-  border-radius:50%;
-  background:var(--gold);
-  box-shadow:0 0 10px var(--gold);
-}
-
-.phrase-ar{
-  position:relative;
-  z-index:2;
-  margin-top:19px;
-  font-family:Amiri,serif;
-  font-style:italic;
-  direction:rtl;
-  font-size:clamp(18px,4vw,22px);
-  line-height:1.9;
-  color:var(--muted);
-  opacity:0;
-  filter:blur(6px);
-  transform:translateY(12px);
-  transition:1.3s ease 1.1s;
-}
-
-.card.reveal .phrase-ar{
-  opacity:1;
-  filter:blur(0);
-  transform:none;
-}
-
-.sub{
-  position:relative;
-  z-index:2;
-  margin-top:20px;
-  color:var(--gold);
-  font-size:10px;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  opacity:0;
-  transform:translateY(10px);
-  transition:1s ease 1.35s;
-}
-
-.card.reveal .sub{
-  opacity:.8;
-  transform:none;
-}
-
-/* ================= ACTIONS ================= */
-
-.card-actions{
-  position:relative;
-  z-index:2;
-  margin-top:28px;
-  opacity:0;
-  transform:translateY(12px);
-  transition:1s ease 1.5s;
-}
-
-.card.reveal .card-actions{
-  opacity:1;
-  transform:none;
-}
-
-.cta a{
-  position:relative;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  min-width:240px;
-  padding:15px 28px;
-  border-radius:999px;
-  border:1px solid rgba(217,176,131,.5);
-  color:var(--cream);
-  text-decoration:none;
-  text-transform:uppercase;
-  letter-spacing:.2em;
-  font-size:11px;
-  overflow:hidden;
-  background:
-    linear-gradient(180deg,rgba(224,38,63,.16),rgba(224,38,63,.025));
-  transition:.45s cubic-bezier(.2,.8,.2,1);
-}
-
-.cta a::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:-120%;
-  width:80%;
-  height:100%;
-  transform:skewX(-20deg);
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
-  transition:.8s ease;
-}
-
-.cta a:hover::before{
-  left:150%;
-}
-
-.cta a:hover{
-  transform:translateY(-3px) scale(1.02);
-  border-color:var(--pink);
-  box-shadow:
-    0 10px 40px rgba(224,38,63,.25),
-    0 0 25px rgba(224,38,63,.15);
-}
-
-.cta svg{
-  width:15px;
-}
-
-.cta-hint{
-  margin-top:10px;
-  font-family:"Cormorant Garamond",serif;
-  font-style:italic;
-  font-size:13px;
-  color:var(--muted);
-  opacity:.65;
-}
-
-.copy-btn{
-  margin-top:18px;
-  border:0;
-  background:none;
-  color:var(--muted);
-  cursor:pointer;
-  font-size:9px;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  transition:.3s ease;
-}
-
-.copy-btn:hover{
-  color:var(--gold);
-}
-
-/* ================= DOUBLE TAP BURST ================= */
-
-.flash{
-  position:fixed;
-  inset:0;
-  z-index:45;
-  pointer-events:none;
-  background:radial-gradient(circle at center,rgba(255,49,80,.28),transparent 40%);
-  opacity:0;
-}
-
-.flash.active{
-  animation:flash .55s ease-out;
-}
-
-@keyframes flash{
-  0%{opacity:0}
-  20%{opacity:1}
-  100%{opacity:0}
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media(max-width:560px){
-
-  .brand{
-    top:13%;
-    font-size:42px;
-  }
-
-  .prompt{
-    bottom:12%;
-  }
-
-  .status{
-    bottom:13px;
-  }
-
-  .card{
-    padding:50px 24px 30px;
-    border-radius:20px;
-  }
-
-  .phrase{
-    font-size:27px;
-  }
-
-  .cta a{
-    min-width:220px;
-    padding:14px 20px;
-  }
-
-  .sound-toggle{
-    right:15px;
-  }
-}
-
-@media(max-width:380px){
-
-  .card{
-    padding:46px 18px 26px;
-  }
-
-  .phrase{
-    font-size:24px;
-  }
-
-  .phrase-ar{
-    font-size:17px;
-  }
-}
-
-/* ================= REDUCED MOTION ================= */
-
-@media(prefers-reduced-motion:reduce){
-
-  *,
-  *::before,
-  *::after{
-    animation:none!important;
-    transition:none!important;
-  }
-
-  .grain,
-  .ember{
-    display:none;
-  }
-}
+    radial-gradient(1100px 500px at 50% -12%, #1c4d36 0%, transparent 60%),
+    radial-gradient(800px 400px at 90% 10%, #12301f22 0%, transparent 70%),
+    var(--deep);
+}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:radial-gradient(1.5px 1.5px at 20% 30%,#fff8 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 70% 15%,#fff6 50%,transparent 51%),
+    radial-gradient(1px 1px at 40% 70%,#fff5 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 85% 60%,#fff7 50%,transparent 51%),
+    radial-gradient(1px 1px at 10% 80%,#fff5 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 55% 45%,#fff6 50%,transparent 51%);
+  background-repeat:no-repeat;animation:twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes twinkle{from{opacity:.35}to{opacity:.7}}
+@media (prefers-reduced-motion:reduce){.stars{animation:none}}
+
+.topbar{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);
+  background:#0a1712d9;border-bottom:1px solid var(--border);}
+.topbar-in{max-width:1180px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:14px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mark{font-size:26px}
+.brand b{font-size:16px}
+.brand span{display:block;font-size:11px;color:var(--muted)}
+.nav{display:flex;gap:18px;font-size:14px;color:var(--muted)}
+.nav a{cursor:pointer}
+.nav a:hover,.nav a.active{color:var(--gold)}
+.userchip{display:flex;align-items:center;gap:10px}
+.avatar-sm{width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#2b5240,#0c1c14);border:1.5px solid var(--gold);display:grid;place-items:center;font-size:16px}
+.streakchip{display:flex;align-items:center;gap:4px;background:#1c2a1f;border:1px solid var(--border);border-radius:99px;padding:4px 10px;font-size:12px}
+.bell{position:relative;width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;cursor:pointer}
+.bell i{position:absolute;top:-3px;left:-3px;background:var(--bad);color:#fff;font-size:10px;border-radius:99px;padding:1px 5px;font-style:normal}
+@media(max-width:820px){.nav{display:none}}
+
+.hero{position:relative;border-radius:26px;overflow:hidden;margin-top:16px;border:1px solid var(--border);
+  background:linear-gradient(180deg,#0c2117 0%,#081611 100%);padding:46px 24px 34px;text-align:center;z-index:1}
+.skyline{position:relative;height:150px;margin:0 auto 10px;max-width:520px}
+.skyline svg{width:100%;height:100%;display:block}
+.moon{animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;background:#17301f;border:1px solid var(--border);color:var(--gold);
+  padding:5px 14px;border-radius:99px;font-size:12.5px;margin-bottom:14px}
+.hero h1{font-size:38px;font-weight:700;color:var(--ivory)}
+.hero h1 em{font-style:normal;color:var(--gold);display:block;font-size:44px}
+.hero p{color:var(--muted);max-width:520px;margin:12px auto 22px;font-size:15px}
+.hero-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+.btn{border:0;border-radius:14px;padding:13px 22px;font-size:15px;font-weight:700;cursor:pointer;
+  background:linear-gradient(180deg,#f0d38e,var(--gold2));color:#152016;box-shadow:0 10px 26px #00000055;transition:.18s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
+.btn.secondary{background:#16281f;color:#fff;border:1px solid var(--border);box-shadow:none}
+.btn.secondary:hover{border-color:var(--gold)}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--ivory)}
+.btn.block{width:100%}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.small{padding:8px 14px;font-size:13px}
+.btn.good{background:var(--good);color:#fff}
+
+.statbar{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:14px}
+.statbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center}
+.statbox b{display:block;font-size:20px;color:var(--gold);font-family:'Amiri',serif}
+.statbox span{font-size:11.5px;color:var(--muted)}
+@media(max-width:820px){.statbar{grid-template-columns:repeat(3,1fr)}}
+
+.grid3{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:14px;margin-top:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+.grid3b{display:grid;grid-template-columns:1.4fr .8fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:980px){.grid3,.grid4,.grid3b{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px}
+.card h2{font-size:17px;color:var(--ivory);display:flex;align-items:center;gap:8px}
+.card h2 small{margin-inline-start:auto;font-size:12px;color:var(--muted);font-weight:400;font-family:'Tajawal'}
+.rowline{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+
+.tabs{display:flex;gap:6px;margin:10px 0;font-size:12.5px;flex-wrap:wrap}
+.tabs button{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:99px;padding:5px 11px;cursor:pointer}
+.tabs button.active{background:var(--gold);color:#152016;border-color:var(--gold);font-weight:700}
+.lbrow{display:flex;align-items:center;gap:10px;padding:9px 6px;border-radius:12px}
+.lbrow:hover{background:#0c1c14}
+.rank{width:22px;text-align:center;font-weight:800;color:var(--muted)}
+.rank.g1{color:#f4d06f}.rank.g2{color:#c9d3cf}.rank.g3{color:#d69a63}
+.lbavatar{width:32px;height:32px;border-radius:50%;background:#1c3327;display:grid;place-items:center;font-size:15px}
+.lbname{flex:1;font-size:14px}
+.lbxp{font-size:13px;color:var(--gold);font-weight:700}
+.lbage{font-size:11px;color:var(--muted);margin-inline-start:6px}
+
+.daily{position:relative;background:linear-gradient(160deg,#16301f,#0a1a12);overflow:hidden}
+.daily:before{content:"📖";position:absolute;font-size:130px;opacity:.06;left:-15px;bottom:-25px}
+.countdown{font-family:'Amiri',serif;font-size:22px;color:var(--gold);text-align:center;letter-spacing:2px;margin:8px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.chip{background:#0f2118;border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:12.5px}
+.streaktext{text-align:center;font-size:13px;color:var(--muted);margin-top:10px}
+
+.profilehead{display:flex;align-items:center;gap:12px}
+.avatar-lg{width:56px;height:56px;border-radius:50%;background:linear-gradient(145deg,#2b5240,#0c1c14);border:2px solid var(--gold);display:grid;place-items:center;font-size:26px}
+.lvlring{margin-inline-start:auto;width:44px;height:44px;border-radius:50%;background:var(--gold);color:#152016;display:grid;place-items:center;font-weight:800;font-family:'Amiri',serif;font-size:16px;border:2px solid #fff2}
+.xpbar{height:8px;border-radius:99px;background:#152720;margin:12px 0 4px;overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold))}
+.xpline{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted)}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:6px;margin-top:14px}
+.stat3 b{display:block;color:var(--gold);font-family:'Amiri',serif;font-size:18px}
+.stat3 span{font-size:11px;color:var(--muted)}
+.badgesrow{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.badgesrow div{width:38px;height:38px;border-radius:11px;background:#0f2118;border:1px solid var(--border);display:grid;place-items:center;font-size:17px;cursor:default;transition:.2s}
+.badgesrow div.unlocked{background:var(--good);border-color:var(--gold)}
+.badgesrow div.locked{opacity:.4}
+
+.tile{text-align:center}
+.tile .ic{font-size:26px;margin-bottom:6px}
+.tile p{color:var(--muted);font-size:13px;margin:6px 0 12px}
+.codebox{background:#0a1710;border:1px dashed var(--gold2);border-radius:12px;padding:10px;font-family:'Amiri',serif;letter-spacing:2px;color:var(--gold);font-size:17px;margin:10px 0;word-break:break-all}
+.badge-tag{display:inline-block;background:#183a24;color:#7fd99a;border-radius:99px;padding:3px 10px;font-size:11.5px;margin-bottom:8px}
+
+.levels-wrap{overflow-x:auto;padding:6px 2px 10px}
+.levels{display:flex;gap:6px;min-width:max-content;padding:10px 4px;align-items:flex-start}
+.lvl{width:96px;text-align:center;position:relative}
+.lvl:not(:last-child):after{content:"";position:absolute;top:29px;right:-9px;width:18px;height:3px;background:var(--border)}
+.lvl.done:not(:last-child):after{background:var(--good)}
+.lvlcircle{width:58px;height:58px;border-radius:50%;margin:auto;display:grid;place-items:center;font-family:'Amiri',serif;font-weight:700;font-size:19px;
+  background:var(--card2);border:2px solid var(--border);color:var(--muted)}
+.lvl.done .lvlcircle{background:linear-gradient(160deg,#2c5c40,#123321);border-color:var(--good);color:#eafff1}
+.lvl.current .lvlcircle{background:linear-gradient(160deg,#f0d38e,var(--gold2));border-color:var(--gold);color:#17230f;box-shadow:0 0 0 5px #e8c47722}
+.lvl small{display:block;margin-top:8px;font-size:11.5px;color:var(--muted)}
+.lvl .stars{font-size:10px;color:var(--gold);letter-spacing:1px}
+
+.tool{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.tool .ic{font-size:22px}
+.tool small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.tool b{display:block;color:var(--gold);font-size:13px;margin-top:2px}
+.toolgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+
+.notif{display:flex;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)}
+.notif:last-child{border:0}
+.notif .ic{font-size:18px}
+.notif b{font-size:13px;display:block}
+.notif span{font-size:11.5px;color:var(--muted)}
+
+footer{text-align:center;color:var(--muted);font-size:12px;padding:26px 10px 10px}
+footer a{color:var(--muted);text-decoration:underline;cursor:pointer}
+
+.quizcard{max-width:760px;margin:26px auto}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pill{background:#0f2118;border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:13px}
+.timerRing{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) 0deg,#20382e 0deg);font-weight:800;font-family:'Amiri',serif}
+.timerRing b{background:var(--deep);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:17px}
+.bar{height:8px;background:#152720;border-radius:99px;overflow:hidden;margin:16px 0}
+.bar i{display:block;height:100%;background:var(--gold);width:0;transition:.3s}
+.questionCard{padding:22px;border-radius:18px;background:var(--card2);border:1px solid var(--border);text-align:center}
+.questionCard h2{font-size:20px;line-height:1.6}
+.answers{display:grid;gap:10px;margin-top:18px}
+.answer{padding:15px;border:1px solid var(--border);background:var(--card);border-radius:14px;cursor:pointer;text-align:right;color:#fff;font-size:15px;transition:.15s}
+.answer:hover{border-color:var(--gold)}
+.answer.correct{background:#173d27;border-color:#4fbd77}
+.answer.wrong{background:#3d1a1a;border-color:#c76464}
+.answer:disabled{cursor:default}
+.helperbar{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.helperbtn{background:var(--card2);border:1px solid var(--border);color:var(--ivory);border-radius:12px;padding:8px 12px;font-size:12.5px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.helperbtn:disabled{opacity:.35;cursor:not-allowed}
+#feedback{text-align:center;min-height:22px;margin-top:10px;font-size:14px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(30px);opacity:0;background:#122a20;border:1px solid var(--gold);color:#fff;padding:12px 18px;border-radius:14px;z-index:60;transition:.3s;box-shadow:0 10px 35px #0008;font-size:13.5px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#musicBtn{position:fixed;left:15px;bottom:15px;z-index:40;border-radius:50%;width:50px;height:50px;border:1px solid var(--gold);background:#10251c;color:var(--gold);font-size:19px;cursor:pointer}
+
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px}
+th,td{padding:10px;border-bottom:1px solid var(--border);text-align:right}
+th{color:var(--gold)}
+input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--border);background:#081710;color:#fff;margin:8px 0;font-size:15px}
+input:focus,select:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+.center{text-align:center}
+.challenge-input{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.challenge-input input{flex:1;min-width:140px}
+
+/* Login Modal */
+.modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--panel);border:2px solid var(--gold);border-radius:28px;padding:40px;max-width:440px;width:100%;text-align:center}
+.modal-box h1{color:var(--gold);font-size:32px;margin-bottom:6px}
+.modal-box p{color:var(--muted);margin-bottom:20px}
+.modal-box input{width:100%;padding:14px;border-radius:14px;border:1px solid var(--border);background:#0b1811;color:#fff;font-size:16px;margin:8px 0}
+.modal-box .btn{width:100%;margin-top:10px}
+.profile-age{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.profile-age span{background:var(--card);padding:2px 10px;border-radius:99px;border:1px solid var(--border);color:var(--gold)}
+.share-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.share-btns button{background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:6px 14px;color:var(--ivory);cursor:pointer;font-size:13px}
+.share-btns button:hover{border-color:var(--gold)}
+
+/* Stat chart */
+.stat-chart{display:flex;gap:6px;align-items:flex-end;height:100px;margin:10px 0}
+.stat-chart .bar{flex:1;background:var(--card2);border-radius:4px 4px 0 0;position:relative;min-height:8px;border:1px solid var(--border);border-bottom:0}
+.stat-chart .bar .fill{position:absolute;bottom:0;left:0;right:0;background:var(--gold);border-radius:4px 4px 0 0;transition:.5s}
+.stat-chart .bar .label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
 </style>
 </head>
-
 <body>
+<div class="stars"></div>
 
-<div class="grain"></div>
-<div class="vignette"></div>
-<canvas id="stars"></canvas>
-
-<div id="stage">
-
-  <div class="center-glow"></div>
-
-  <canvas id="heartCanvas"></canvas>
-
-  <div class="brand" id="brand">
-    <span>xxl5il</span>
+<!-- ============ LOGIN MODAL ============ -->
+<div id="loginModal" class="modal-overlay" style="display:flex">
+  <div class="modal-box">
+    <div style="font-size:52px">🕌</div>
+    <h1>مرحباً بك!</h1>
+    <p>أدخل اسمك وعمرك لبدء رحلة السيرة النبوية ﷺ</p>
+    <input id="loginName" placeholder="الاسم الكامل أو المستعار" maxlength="30" value="">
+    <input id="loginAge" type="number" placeholder="العمر" min="6" max="120" value="">
+    <select id="loginCountry">
+      <option value="">اختر دولتك (اختياري)</option>
+      <option value="SA">🇸🇦 السعودية</option>
+      <option value="EG">🇪🇬 مصر</option>
+      <option value="DZ">🇩🇿 الجزائر</option>
+      <option value="MA">🇲🇦 المغرب</option>
+      <option value="TN">🇹🇳 تونس</option>
+      <option value="LY">🇱🇾 ليبيا</option>
+      <option value="SD">🇸🇩 السودان</option>
+      <option value="SY">🇸🇾 سوريا</option>
+      <option value="IQ">🇮🇶 العراق</option>
+      <option value="JO">🇯🇴 الأردن</option>
+      <option value="PS">🇵🇸 فلسطين</option>
+      <option value="LB">🇱🇧 لبنان</option>
+      <option value="KW">🇰🇼 الكويت</option>
+      <option value="QA">🇶🇦 قطر</option>
+      <option value="AE">🇦🇪 الإمارات</option>
+      <option value="OM">🇴🇲 عمان</option>
+      <option value="BH">🇧🇭 البحرين</option>
+      <option value="YE">🇾🇪 اليمن</option>
+      <option value="TR">🇹🇷 تركيا</option>
+      <option value="IR">🇮🇷 إيران</option>
+      <option value="PK">🇵🇰 باكستان</option>
+      <option value="IN">🇮🇳 الهند</option>
+      <option value="ID">🇮🇩 إندونيسيا</option>
+      <option value="MY">🇲🇾 ماليزيا</option>
+      <option value="US">🇺🇸 أمريكا</option>
+      <option value="UK">🇬🇧 بريطانيا</option>
+      <option value="FR">🇫🇷 فرنسا</option>
+      <option value="DE">🇩🇪 ألمانيا</option>
+      <option value="other">🌍 أخرى</option>
+    </select>
+    <button class="btn" id="loginBtn" onclick="loginUser()">دخول 🚀</button>
+    <p class="muted" style="font-size:12px;margin-top:12px">سيتم حفظ بياناتك محلياً في متصفحك</p>
   </div>
-
-  <div class="prompt" id="prompt">
-    <div class="prompt-icon">↓</div>
-    <div>tap the heart</div>
-  </div>
-
-  <div class="status">made with a little feeling</div>
-
-  <button class="sound-toggle muted" id="soundToggle" aria-label="Toggle sound">
-
-    <svg class="waves" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.5">
-      <path d="M11 5 6 9H3v6h3l8 5V4Z"/>
-      <path d="M16 8a5 5 0 0 1 0 8"/>
-      <path d="M19 5a9 9 0 0 1 0 14"/>
-    </svg>
-
-    <svg class="slash" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="1.5"
-         style="position:absolute">
-      <path d="M3 3l18 18"/>
-    </svg>
-
-  </button>
-
 </div>
 
-<div class="flash" id="flash"></div>
+<!-- ============ TOPBAR ============ -->
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="mark">🕌</span>
+      <div><b>مسابقة السيرة النبوية</b><span>اختبر معلوماتك.. وارتقِ في درجاتك</span></div>
+    </div>
+    <nav class="nav">
+      <a class="active">الرئيسية</a><a>المتصدرون</a><a>البطولات</a><a>المتجر</a><a>المزيد</a>
+    </nav>
+    <div class="userchip">
+      <span class="streakchip">🔥 <b id="topStreak">0</b></span>
+      <div class="bell" onclick="toast('لا إشعارات جديدة')"><span id="bellIcon">🔔</span><i id="notifCount">0</i></div>
+      <div class="avatar-sm" id="topAvatar">🙂</div>
+    </div>
+  </div>
+</header>
 
-<div class="overlay" id="overlay">
+<div class="wrap">
 
-  <div class="embers" id="embers"></div>
+  <!-- ============ HOME ============ -->
+  <div id="home">
 
-  <div class="card-wrap">
-
-    <div class="card glow" id="card">
-
-      <div class="corner tl"></div>
-      <div class="corner tr"></div>
-      <div class="corner bl"></div>
-      <div class="corner br"></div>
-
-      <button class="card-close" id="cardClose" aria-label="Close">
-        ×
-      </button>
-
-      <div class="eyebrow">
-        a little something
+    <section class="hero">
+      <div class="eyebrow">🌙 أكبر مسابقة إسلامية تفاعلية</div>
+      <div class="skyline">
+        <svg viewBox="0 0 520 150" preserveAspectRatio="xMidYMax meet">
+          <circle class="moon" cx="90" cy="34" r="17" fill="#f0d38e" opacity=".9"/>
+          <circle cx="83" cy="30" r="17" fill="#0c2117" opacity=".9"/>
+          <g fill="#0d251b" stroke="#1f4634" stroke-width="1">
+            <rect x="10" y="95" width="26" height="55"/>
+            <circle cx="23" cy="90" r="10"/>
+            <rect x="18" y="60" width="10" height="35"/>
+            <rect x="60" y="80" width="40" height="70"/>
+            <path d="M60 80 Q80 55 100 80 Z"/>
+            <rect x="120" y="100" width="20" height="50"/>
+            <circle cx="130" cy="96" r="8"/>
+            <rect x="200" y="55" width="60" height="95"/>
+            <path d="M200 55 Q230 15 260 55 Z"/>
+            <circle cx="230" cy="18" r="4" fill="#e8c477" stroke="none"/>
+            <rect x="222" y="0" width="4" height="18" fill="#3a5a49" stroke="none"/>
+            <rect x="270" y="105" width="18" height="45"/>
+            <circle cx="279" cy="102" r="7"/>
+            <rect x="300" y="88" width="22" height="62"/>
+            <circle cx="311" cy="83" r="9"/>
+            <rect x="305" y="55" width="10" height="33"/>
+            <rect x="345" y="75" width="42" height="75"/>
+            <path d="M345 75 Q366 48 387 75 Z"/>
+            <rect x="410" y="100" width="20" height="50"/>
+            <circle cx="420" cy="96" r="8"/>
+            <rect x="460" y="90" width="24" height="60"/>
+            <circle cx="472" cy="85" r="9"/>
+            <rect x="466" y="55" width="10" height="35"/>
+          </g>
+        </svg>
       </div>
-
-      <div class="phrase" id="phrase">
-        You are exactly the kind of person
-        the world needs more of.
+      <h1>اختبر معلوماتك في<em>السيرة النبوية</em></h1>
+      <p>تحدَّ نفسك والآخرين في أكبر مسابقة إسلامية تفاعلية — تعلّم، تنافس، وكن من الأفضل.</p>
+      <div class="hero-ctas">
+        <button class="btn" onclick="openQuiz('normal')">ابدأ اللعب الآن ▶</button>
+        <button class="btn secondary" onclick="scrollToId('challengeFriend')">⚔️ تحدَّ صديقك</button>
       </div>
+    </section>
 
-      <div class="divider">
-        <span></span>
-      </div>
+    <section class="statbar">
+      <div class="statbox"><b id="statTotalPlayers">0</b><span>مشارك إجمالي</span></div>
+      <div class="statbox"><b id="statTodayPlayers">0</b><span>مشارك اليوم</span></div>
+      <div class="statbox"><b id="statTotalGames">0</b><span>مباراة لُعبت</span></div>
+      <div class="statbox"><b id="statTotalQuestions">0</b><span>سؤال تمت الإجابة عنه</span></div>
+      <div class="statbox"><b id="statAvgScore">0</b><span>متوسط النقاط</span></div>
+      <div class="statbox"><b id="statCountries">0</b><span>دولة مشاركة</span></div>
+    </section>
 
-      <div class="phrase-ar">
-        أنت بالضبط ذلك النوع من الأشخاص
-        <br>
-        الذي يحتاجه العالم أكثر.
-      </div>
-
-      <div class="sub">
-        Keep going. It looks good on you.
-      </div>
-
-      <div class="card-actions">
-
-        <div class="cta">
-
-          <a
-            href="https://ig.me/m/xxl5il"
-            target="_blank"
-            rel="noopener noreferrer"
-            id="dmLink"
-          >
-
-            <svg viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.6">
-              <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8
-                       8.5 8.5 0 0 1-7.6 4.7
-                       8.4 8.4 0 0 1-3.8-.9
-                       L3 21l1.9-5.7
-                       a8.4 8.4 0 0 1-.9-3.8
-                       8.5 8.5 0 0 1 4.7-7.6
-                       8.4 8.4 0 0 1 3.8-.9h.5
-                       a8.5 8.5 0 0 1 8 8v.5Z"/>
-            </svg>
-
-            Send me a message
-
-          </a>
-
-          <div class="cta-hint">
-            opens our chat — a "thanks" means a lot
-          </div>
-
+    <div class="grid3">
+      <!-- Leaderboard -->
+      <div class="card">
+        <h2>🏆 المتصدرون <small id="lbFilterLabel">كل الأعمار</small></h2>
+        <div class="tabs" id="lbTabs">
+          <button data-t="all" class="active">الكل</button>
+          <button data-t="under15">أقل من 15</button>
+          <button data-t="15to25">15-25</button>
+          <button data-t="over25">أكثر من 25</button>
         </div>
-
-        <button class="copy-btn" id="copyBtn">
-          <span id="copyLabel">Copy this message</span>
-        </button>
-
+        <div id="lbList"></div>
+        <button class="btn ghost block" style="margin-top:10px" onclick="toast('قريبًا: صفحة كل المتصدرين')">عرض جميع المتصدرين</button>
       </div>
 
+      <!-- Daily challenge -->
+      <div class="card daily" style="position:relative">
+        <h2>🔥 تحدي اليوم</h2>
+        <p class="muted center" style="margin:4px 0">ينتهي بعد</p>
+        <div class="countdown" id="countdown">--:--:--</div>
+        <div class="chips">
+          <span class="chip">🎯 10 أسئلة فقط</span>
+          <span class="chip">⏱️ 15 ثانية لكل سؤال</span>
+          <span class="chip">⭐ Bonus ×2</span>
+        </div>
+        <button class="btn block" onclick="openQuiz('daily')">ابدأ التحدي اليومي 🚀</button>
+        <p class="streaktext">🔥 سلسلة يومية: <b id="streakDays">0</b> أيام متتالية</p>
+      </div>
+
+      <!-- Profile -->
+      <div class="card" id="profileCard">
+        <div class="profilehead">
+          <div class="avatar-lg" id="profAvatar">🙂</div>
+          <div>
+            <b id="profName">ضيف</b>
+            <div class="profile-age"><span id="profAge">-- سنة</span> <span id="profCountry" style="font-size:12px"></span></div>
+          </div>
+          <div class="lvlring" id="profLevel">1</div>
+        </div>
+        <div class="xpbar"><i id="xpFill" style="width:12%"></i></div>
+        <div class="xpline"><span id="xpNow">0 XP</span><span id="xpNext">300 XP</span></div>
+        <div class="stat3">
+          <div><b id="statGames">0</b><span>المسابقات</span></div>
+          <div><b id="statAcc">—</b><span>نسبة النجاح</span></div>
+          <div><b id="statStreak">0</b><span>أطول سلسلة</span></div>
+        </div>
+        <div class="badgesrow" id="badgesRow">
+          <div data-badge="firstWin" title="أول انتصار">🏅</div>
+          <div data-badge="streak10" title="10 متتالية">🔥</div>
+          <div data-badge="q100" title="100 سؤال">🕌</div>
+          <div data-badge="quick" title="إجابة سريعة">⚡</div>
+          <div data-badge="perfect" title="إجابة مثالية">🌟</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid4">
+      <div class="card tile" id="challengeFriend">
+        <div class="ic">⚔️</div>
+        <h2 style="justify-content:center">تحدَّ صديقك</h2>
+        <p>أنشئ تحديًا وشارك الكود مع صديقك وتنافسا في نفس الأسئلة</p>
+        <div class="codebox" id="challengeCode">SIRA-8F42</div>
+        <div class="share-btns">
+          <button onclick="shareChallengeWhatsApp()">📱 واتساب</button>
+          <button onclick="shareChallengeTwitter()">🐦 تويتر</button>
+          <button onclick="copyChallengeCode()">📋 نسخ</button>
+        </div>
+        <div class="challenge-input">
+          <input id="challengeInput" placeholder="أدخل كود التحدي هنا">
+          <button class="btn small" onclick="joinChallenge()">انضم</button>
+        </div>
+        <button class="btn secondary block" onclick="newChallengeCode()">إنشاء تحدٍ جديد</button>
+      </div>
+      <div class="card tile">
+        <div class="ic">🎁</div>
+        <span class="badge-tag">نشطة الآن</span>
+        <h2 style="justify-content:center">البطولات</h2>
+        <p>بطولة المولد النبوي الشريف ﷺ — تنتهي بعد 5 أيام</p>
+        <button class="btn secondary block" onclick="toast('سجّلت اهتمامك بالبطولة')">شارك الآن</button>
+      </div>
+      <div class="card tile">
+        <div class="ic">📖</div>
+        <h2 style="justify-content:center">وضع التعلم</h2>
+        <p>راجع أخطاءك مع شرح مفصّل لكل سؤال قبل خوض التحدي</p>
+        <button class="btn secondary block" onclick="openQuiz('learn')">ابدأ التعلم</button>
+      </div>
+      <div class="card tile">
+        <div class="ic">🛍️</div>
+        <h2 style="justify-content:center">المتجر</h2>
+        <p>استخدم نقاطك لشراء مساعدات ومزايا خاصة</p>
+        <button class="btn secondary block" onclick="openShop()">تصفح المتجر 🛒</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>🧭 المستويات <small>10 مراحل من المولد إلى الخبرة بالسيرة</small></h2>
+      <div class="levels-wrap"><div class="levels" id="levelsRow"></div></div>
+    </div>
+
+    <!-- Stats Chart -->
+    <div class="card" style="margin-top:14px">
+      <h2>📊 إحصائيات الأداء <small>آخر 7 أيام</small></h2>
+      <div class="stat-chart" id="statsChart"></div>
+    </div>
+
+    <div class="grid3b">
+      <div class="card">
+        <h2>🧰 أدوات ومساعدات</h2>
+        <div class="toolgrid">
+          <div class="tool"><div class="ic">🌓</div><b>50/50</b><small>يحذف إجابتين</small></div>
+          <div class="tool"><div class="ic">💡</div><b>تلميح</b><small>يعطي معلومة</small></div>
+          <div class="tool"><div class="ic">⏱️</div><b>+10 ثواني</b><small>وقت إضافي</small></div>
+          <div class="tool"><div class="ic">🔄</div><b>تغيير السؤال</b><small>يستبدل السؤال</small></div>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:10px">تُستخدم هذه المساعدات مباشرة أثناء المسابقة.</p>
+      </div>
+      <div class="card center">
+        <div class="ic" style="font-size:34px">📲</div>
+        <h2 style="justify-content:center;margin-top:6px">حمّل التطبيق</h2>
+        <p class="muted" style="font-size:13px">أضف المسابقة إلى شاشتك الرئيسية والعب دون اتصال</p>
+        <button class="btn secondary block" onclick="installPwa()">➕ أضف إلى الشاشة الرئيسية</button>
+      </div>
+      <div class="card">
+        <h2>🔔 إشعارات <small id="notifBadge">0</small></h2>
+        <div id="notifList">
+          <div class="notif"><span class="ic">🏅</span><div><b>تم تحقيق إنجاز جديد</b><span>أول انتصار — منذ 5 دقائق</span></div></div>
+          <div class="notif"><span class="ic">🎉</span><div><b>بدأت بطولة جديدة</b><span>بطولة المولد النبوي — منذ 15 دقيقة</span></div></div>
+        </div>
+      </div>
     </div>
 
   </div>
 
+  <!-- ============ SHOP ============ -->
+  <section id="shop" class="hidden">
+    <div class="card" style="max-width:900px;margin:20px auto">
+      <div class="rowline"><h1>🛍️ المتجر</h1><button class="btn secondary" onclick="goHome()">الرئيسية</button></div>
+      <p class="muted">استخدم نقاط XP لشراء مساعدات ومزايا خاصة</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:14px">
+        <div class="card tile"><div class="ic">🌓</div><b>50/50 (3 مرات)</b><p>100 XP</p><button class="btn small" onclick="buyItem('5050')">شراء</button></div>
+        <div class="card tile"><div class="ic">💡</div><b>تلميح (3 مرات)</b><p>80 XP</p><button class="btn small" onclick="buyItem('hint')">شراء</button></div>
+        <div class="card tile"><div class="ic">⏱️</div><b>+10 ثواني (3 مرات)</b><p>120 XP</p><button class="btn small" onclick="buyItem('time')">شراء</button></div>
+        <div class="card tile"><div class="ic">🔄</div><b>تغيير السؤال (مرتين)</b><p>150 XP</p><button class="btn small" onclick="buyItem('skip')">شراء</button></div>
+        <div class="card tile"><div class="ic">🎨</div><b>ثيم ذهبي</b><p>500 XP</p><button class="btn small" onclick="buyItem('theme')">شراء</button></div>
+        <div class="card tile"><div class="ic">👑</div><b>لقب مميز</b><p>300 XP</p><button class="btn small" onclick="buyItem('title')">شراء</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="quiz" class="hidden">
+    <div class="quizcard">
+      <div class="qtop">
+        <span class="pill">السؤال <b id="qNum"></b> / <b id="qTotal"></b></span>
+        <div class="timerRing" id="timerRing"><b id="timer">15</b></div>
+        <span class="pill">⭐ <b id="score">0</b> XP</span>
+      </div>
+      <div class="bar"><i id="progress"></i></div>
+      <div class="questionCard"><h2 id="question"></h2></div>
+      <div id="answers" class="answers"></div>
+      <p id="feedback"></p>
+      <div class="helperbar">
+        <button class="helperbtn" id="h5050" onclick="useHelper('5050')">🌓 50/50 (<span id="c5050">3</span>)</button>
+        <button class="helperbtn" id="hHint" onclick="useHelper('hint')">💡 تلميح (<span id="cHint">3</span>)</button>
+        <button class="helperbtn" id="hTime" onclick="useHelper('time')">⏱️ +10 ثواني (<span id="cTime">3</span>)</button>
+        <button class="helperbtn" id="hSkip" onclick="useHelper('skip')">🔄 تغيير السؤال (<span id="cSkip">2</span>)</button>
+      </div>
+      <button class="btn ghost block" style="margin-top:16px" onclick="goHome()">إنهاء والعودة للرئيسية</button>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="result" class="hidden">
+    <div class="quizcard card center">
+      <div style="font-size:52px">🏆</div>
+      <h1>انتهت المسابقة!</h1>
+      <h2 id="resultName" class="muted" style="font-family:'Tajawal'"></h2>
+      <p>النتيجة: <b id="resultScore" style="color:var(--gold)"></b></p>
+      <p>الإجابات الصحيحة: <b id="resultCorrect"></b> / <b id="resultTotal"></b></p>
+      <p>المستوى: <span class="pill" id="resultLevel"></span></p>
+      <div id="newBadge" class="hidden" style="margin:10px 0;padding:10px;background:var(--good);border-radius:12px;border:1px solid var(--gold)">
+        🎉 <b>إنجاز جديد!</b> <span id="newBadgeText"></span>
+      </div>
+      <div id="challengeCompare" class="hidden" style="margin:12px 0;padding:12px;background:var(--card2);border-radius:12px;border:1px solid var(--gold)">
+        <h3>⚔️ مقارنة التحدي</h3>
+        <div id="compareResult"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">
+        <button class="btn" onclick="shareResult()">📤 مشاركة نتيجتي</button>
+        <button class="btn secondary" onclick="openQuiz('normal')">العب من جديد</button>
+        <button class="btn ghost" onclick="goHome()">الرئيسية</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN ============ -->
+  <section id="admin" class="hidden">
+    <div class="card" style="max-width:900px;margin:20px auto">
+      <div class="rowline"><h1>👑 لوحة الإدارة</h1><button class="btn secondary" onclick="goHome()">الرئيسية</button></div>
+      <div id="loginBox">
+        <p class="muted">لوحة محلية تجريبية (بيانات هذا الجهاز فقط).</p>
+        <input id="adminPass" type="password" placeholder="كلمة مرور الإدارة">
+        <button class="btn" onclick="adminLogin()">دخول</button>
+      </div>
+      <div id="dashboard" class="hidden">
+        <div class="statbar" style="grid-template-columns:repeat(4,1fr)">
+          <div class="statbox"><b id="participants">0</b><span>مشارك</span></div>
+          <div class="statbox"><b id="games">0</b><span>محاولة</span></div>
+          <div class="statbox"><b id="best">0</b><span>أفضل نتيجة</span></div>
+          <div class="statbox"><b id="today">0</b><span>اليوم</span></div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn small secondary" onclick="exportData()">📤 تصدير البيانات</button>
+          <button class="btn small" onclick="importData()">📥 استيراد البيانات</button>
+          <button class="btn small danger" onclick="clearAllData()">🗑️ حذف الكل</button>
+        </div>
+        <div class="rowline" style="margin-top:18px"><h2>المشاركون</h2></div>
+        <div style="overflow:auto"><table><thead><tr><th>الاسم</th><th>العمر</th><th>الدولة</th><th>النقاط</th><th>الصحيح</th><th>المستوى</th><th>التاريخ</th></tr></thead>
+        <tbody id="participantsTable"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2026 — مسابقة السيرة النبوية ﷺ · المحتوى تعليمي، يُفضّل مراجعة المصادر الشرعية قبل النشر النهائي · <a onclick="showAdmin()">لوحة الإدارة</a></footer>
 </div>
 
+<button id="musicBtn" title="تشغيل الأنشودة">🎵</button>
+<div id="toast" class="toast"></div>
+
 <script>
-(() => {
+/* ================= DATA ================= */
+const LEVELS = [
+ {n:"مولد ونشأة النبي",stars:3,done:true},
+ {n:"بداية الوحي",stars:3,done:true},
+ {n:"الدعوة في مكة",stars:2,done:true},
+ {n:"الهجرة",stars:2,done:true,current:true},
+ {n:"المدينة",stars:0,done:false},
+ {n:"الغزوات",stars:0,done:false},
+ {n:"أهل البيت",stars:0,done:false},
+ {n:"الصحابة",stars:0,done:false},
+ {n:"الأخلاق والشمائل",stars:0,done:false},
+ {n:"الخبير بالسيرة",stars:0,done:false},
+];
 
-"use strict";
+const QUESTIONS = [
+ {q:"أين وُلد النبي ﷺ؟", a:["المدينة المنورة","مكة المكرمة","الطائف","القدس"], c:1, info:"وُلد النبي ﷺ في مكة المكرمة عام الفيل."},
+ {q:"ما اسم والد النبي ﷺ؟", a:["أبو طالب","عبد الله بن عبد المطلب","عبد المطلب","حمزة"], c:1, info:"توفي عبد الله والد النبي ﷺ قبل ولادته."},
+ {q:"ما اسم والدة النبي ﷺ؟", a:["خديجة بنت خويلد","آمنة بنت وهب","فاطمة بنت أسد","صفية بنت عبد المطلب"], c:1, info:"آمنة بنت وهب من بني زهرة، توفيت والنبي ﷺ صغير."},
+ {q:"من مرضعة النبي ﷺ المشهورة؟", a:["حليمة السعدية","أسماء بنت أبي بكر","سمية بنت خياط","صفية"], c:0, info:"أرضعته حليمة السعدية من بني سعد."},
+ {q:"في أي عام وُلد النبي ﷺ؟", a:["عام الفيل","عام الحزن","السنة الأولى للهجرة","عام بدر"], c:0, info:"سُمي بعام الفيل نسبة لحادثة أصحاب الفيل."},
+ {q:"بماذا كان يُلقب النبي ﷺ قبل البعثة؟", a:["الفاروق","الصديق","الصادق الأمين","سيف الله"], c:2, info:"اشتهر بين قومه بالصدق والأمانة."},
+ {q:"كم كان عمر النبي ﷺ عند نزول الوحي؟", a:["25","30","40","63"], c:2},
+ {q:"أين نزل أول الوحي؟", a:["غار ثور","غار حراء","المسجد الأقصى","جبل أحد"], c:1},
+ {q:"من مَلَك الوحي؟", a:["ميكائيل","إسرافيل","جبريل","مالك"], c:2},
+ {q:"ما أول كلمة نزلت من القرآن؟", a:["الحمد","اقرأ","قل","سبح"], c:1},
+ {q:"ما أول سورة نزلت منها آيات الوحي؟", a:["الفاتحة","البقرة","العلق","الناس"], c:2},
+ {q:"من أول امرأة آمنت بالنبي ﷺ؟", a:["عائشة","خديجة","فاطمة","حفصة"], c:1},
+ {q:"من أول من آمن به من الرجال الأحرار؟", a:["عمر","أبو بكر","عثمان","حمزة"], c:1},
+ {q:"من أول من آمن به من الصبيان؟", a:["علي بن أبي طالب","الحسن","أسامة","أنس"], c:0},
+ {q:"أين كان المسلمون يجتمعون سرًا في بداية الدعوة؟", a:["دار الأرقم","دار أبي سفيان","المسجد النبوي","غار ثور"], c:0},
+ {q:"من الصحابي الذي عُذب وكان يقول: أحد أحد؟", a:["بلال بن رباح","سلمان","صهيب","خباب"], c:0},
+ {q:"من أول شهيدة في الإسلام؟", a:["سمية بنت خياط","خديجة","نسيبة","فاطمة"], c:0},
+ {q:"إلى أين هاجر بعض المسلمين أولًا؟", a:["الشام","الحبشة","اليمن","العراق"], c:1},
+ {q:"من ملك الحبشة الذي آوى المسلمين؟", a:["كسرى","النجاشي","قيصر","المقوقس"], c:1},
+ {q:"من الصحابي الذي تحدث أمام النجاشي؟", a:["جعفر بن أبي طالب","بلال","عمر","عثمان"], c:0},
+ {q:"إلى أين هاجر النبي ﷺ؟", a:["الطائف","المدينة المنورة","الحبشة","الشام"], c:1},
+ {q:"من صاحب النبي ﷺ في الهجرة؟", a:["عمر","أبو بكر","عثمان","علي"], c:1},
+ {q:"ما الغار الذي اختبأ فيه النبي ﷺ أثناء الهجرة؟", a:["حراء","ثور","أحد","النور"], c:1},
+ {q:"من نام في فراش النبي ﷺ ليلة الهجرة؟", a:["أبو بكر","علي بن أبي طالب","عمر","عثمان"], c:1},
+ {q:"كم مكث النبي ﷺ وأبو بكر في غار ثور؟", a:["ليلة","ليلتين","ثلاث ليال","سبع ليال"], c:2},
+ {q:"من كان دليل النبي ﷺ وأبي بكر في الطريق؟", a:["عبد الله بن أريقط","زيد بن ثابت","مصعب بن عمير","عامر بن فهيرة"], c:0},
+ {q:"ما أول مسجد في طريق الهجرة؟", a:["المسجد النبوي","مسجد قباء","المسجد الحرام","المسجد الأقصى"], c:1},
+ {q:"ما أول معركة كبرى بين المسلمين وقريش؟", a:["أحد","بدر","الخندق","تبوك"], c:1},
+ {q:"في أي سنة وقعت بدر؟", a:["1 هـ","2 هـ","3 هـ","5 هـ"], c:1},
+ {q:"ما السورة التي تحدثت عن بدر؟", a:["الأنفال","الفتح","الأحزاب","التوبة"], c:0},
+ {q:"من أبرز قادة قريش الذين قتلوا في بدر؟", a:["أبو جهل","أبو لهب","أبو طالب","العباس"], c:0},
+ {q:"في أي سنة وقعت غزوة أحد؟", a:["2 هـ","3 هـ","5 هـ","8 هـ"], c:1},
+ {q:"من عم النبي ﷺ الذي استشهد في أحد؟", a:["أبو طالب","حمزة","العباس","الحارث"], c:1},
+ {q:"ما الغزوة التي تسمى الأحزاب؟", a:["بدر","أحد","الخندق","حنين"], c:2},
+ {q:"من اقترح حفر الخندق؟", a:["سلمان الفارسي","بلال","أبو هريرة","خالد"], c:0},
+ {q:"في أي سنة وقعت غزوة الخندق؟", a:["3 هـ","4 هـ","5 هـ","6 هـ"], c:2},
+ {q:"ما اسم الصلح الذي عقده النبي ﷺ مع قريش؟", a:["صلح الحديبية","صلح بدر","صلح الطائف","صلح تبوك"], c:0},
+ {q:"في أي سنة كان صلح الحديبية؟", a:["5 هـ","6 هـ","7 هـ","8 هـ"], c:1},
+ {q:"ما البيعة التي وقعت في الحديبية؟", a:["بيعة العقبة","بيعة الرضوان","بيعة الهجرة","بيعة الفتح"], c:1},
+ {q:"في أي سنة فتح النبي ﷺ مكة؟", a:["6 هـ","7 هـ","8 هـ","9 هـ"], c:2},
+ {q:"ما الغزوة التي وقعت بعد فتح مكة؟", a:["حنين","بدر","أحد","الخندق"], c:0},
+ {q:"ما آخر غزوة خرج فيها النبي ﷺ؟", a:["حنين","تبوك","أحد","بدر"], c:1},
+ {q:"في أي سنة كانت غزوة تبوك؟", a:["7 هـ","8 هـ","9 هـ","10 هـ"], c:2},
+ {q:"ما آخر حجة حجها النبي ﷺ؟", a:["حجة الفتح","حجة الوداع","حجة بدر","حجة الإسلام الأولى"], c:1},
+ {q:"في أي سنة كانت حجة الوداع؟", a:["8 هـ","9 هـ","10 هـ","11 هـ"], c:2},
+ {q:"كم عدد بنات النبي ﷺ؟", a:["2","3","4","5"], c:2},
+ {q:"من أصغر بنات النبي ﷺ؟", a:["زينب","رقية","أم كلثوم","فاطمة"], c:3},
+ {q:"من زوج فاطمة رضي الله عنها؟", a:["عثمان","علي","عمر","أبو بكر"], c:1},
+ {q:"من سبطا النبي ﷺ؟", a:["القاسم وعبد الله","الحسن والحسين","إبراهيم وإسماعيل","زيد وأسامة"], c:1},
+ {q:"من زوجات النبي ﷺ ابنة أبي بكر؟", a:["حفصة","عائشة","أم حبيبة","صفية"], c:1},
+ {q:"من الصحابي الملقب بالفاروق؟", a:["أبو بكر","عمر","عثمان","علي"], c:1},
+ {q:"من الصحابي الملقب بذي النورين؟", a:["عثمان","علي","خالد","بلال"], c:0},
+ {q:"من الصحابي الملقب بسيف الله المسلول؟", a:["حمزة","خالد بن الوليد","سلمان","أبو عبيدة"], c:1},
+ {q:"من مؤذن النبي ﷺ المشهور؟", a:["أنس","بلال","زيد","سلمان"], c:1},
+ {q:"من أكثر الصحابة رواية للحديث؟", a:["أبو هريرة","ابن عباس","أنس","ابن عمر"], c:0},
+ {q:"من الصحابي الذي خدم النبي ﷺ عشر سنوات؟", a:["أنس بن مالك","أبو هريرة","زيد بن ثابت","مصعب"], c:0},
+ {q:"ما أعظم معجزة خالدة للنبي ﷺ؟", a:["القرآن الكريم","العصا","السفينة","النار"], c:0},
+ {q:"في أي سورة ورد وصف النبي ﷺ بأنه خاتم النبيين؟", a:["الأحزاب","الصف","الفتح","النور"], c:0},
+ {q:"في أي سورة ورد اسم أحمد؟", a:["الصف","الأحزاب","الفتح","التوبة"], c:0},
+ {q:"في أي سورة ورد: وإنك لعلى خلق عظيم؟", a:["القلم","الفتح","الأحزاب","النور"], c:0},
+ {q:"ما القبلة الأولى للمسلمين؟", a:["الكعبة","بيت المقدس","قباء","المسجد النبوي"], c:1},
+ {q:"ماذا فُرض في رحلة المعراج؟", a:["الزكاة","الصوم","الصلاة","الحج"], c:2},
+ {q:"كم صلاة فرضت أولًا ثم خففت إلى خمس؟", a:["10","20","50","100"], c:2},
+ {q:"أين توفي النبي ﷺ؟", a:["مكة","المدينة","الطائف","القدس"], c:1},
+ {q:"في أي سنة توفي النبي ﷺ؟", a:["9 هـ","10 هـ","11 هـ","12 هـ"], c:2},
+ {q:"في أي يوم توفي النبي ﷺ؟", a:["الجمعة","السبت","الأحد","الاثنين"], c:3},
+ {q:"أين دفن النبي ﷺ؟", a:["البقيع","حجرة عائشة رضي الله عنها","مكة","قباء"], c:1},
+ {q:"من تولى إمامة المسلمين في مرض النبي ﷺ؟", a:["عمر","علي","أبو بكر","عثمان"], c:2},
+ {q:"من أول خليفة بعد النبي ﷺ؟", a:["عمر","أبو بكر","عثمان","علي"], c:1},
+ {q:"ما اسم جد النبي ﷺ؟", a:["عبد المطلب","أمية","هاشم","نوفل"], c:0},
+ {q:"من أي قبيلة كانت آمنة بنت وهب؟", a:["بني زهرة","بني تيم","بني عدي","بني مخزوم"], c:0},
+ {q:"أين توفيت أم النبي ﷺ؟", a:["في مكة","في الأبواء","في المدينة","في الطائف"], c:1, info:"توفيت آمنة في الأبواء بين مكة والمدينة وهو ابن ست سنوات."},
+ {q:"كم كان عمر النبي ﷺ عند وفاة أمه؟", a:["ست سنوات","ثماني سنوات","عشر سنوات","أربع سنوات"], c:0},
+ {q:"من تولى رعاية النبي ﷺ بعد وفاة جده؟", a:["أبو لهب","أبو طالب","العباس","حمزة"], c:1},
+ {q:"ما مهنة النبي ﷺ في صغره؟", a:["التجارة فقط","رعي الغنم","الزراعة","صناعة السيوف"], c:1},
+ {q:"من التي أرسلت النبي ﷺ في تجارتها قبل الزواج؟", a:["خديجة","صفية","هالة","آمنة"], c:0},
+ {q:"كم كان عمر النبي ﷺ عند زواجه بخديجة؟", a:["عشرين سنة","خمسًا وعشرين سنة","ثلاثين سنة","أربعين سنة"], c:1},
+ {q:"كم عدد أولاد النبي ﷺ من خديجة؟", a:["أربعة","خمسة","ستة","سبعة"], c:2},
+ {q:"من أم إبراهيم ابن النبي ﷺ؟", a:["مارية القبطية","صفية","جويرية","ميمونة"], c:0},
+ {q:"ماذا كانت تسمى رؤى النبي ﷺ قبل الوحي؟", a:["الرؤيا الصادقة","الإلهام","الكشف","البشرى"], c:0},
+ {q:"ماذا قال جبريل للنبي ﷺ أول مرة؟", a:["سلام","اقرأ","أنذر","قم"], c:1},
+ {q:"إلى من ذهبت خديجة بالنبي ﷺ بعد نزول الوحي؟", a:["أبي بكر","ورقة بن نوفل","أبي طالب","حمزة"], c:1, info:"ورقة بن نوفل كان على علم بالكتب السابقة، وبشّره بأنه نبي هذه الأمة."},
+ {q:"ماذا نزل بعد فترة انقطاع الوحي؟", a:["سورة العلق","أوائل سورة المدثر","سورة الفاتحة","سورة الإخلاص"], c:1},
+ {q:"ما اسم الصنم الأكبر عند قريش؟", a:["اللات","هبل","العزى","مناة"], c:1},
+ {q:"من أكثر من آذى النبي ﷺ من أعمامه؟", a:["العباس","حمزة","أبو لهب","أبو طالب"], c:2},
+ {q:"أين وقع حصار بني هاشم؟", a:["شعب أبي طالب","دار الأرقم","غار حراء","الطائف"], c:0},
+ {q:"كم استمر حصار شعب أبي طالب تقريبًا؟", a:["سنة","ثلاث سنوات","خمس سنوات","شهر"], c:1},
+ {q:"كم مرة هاجر المسلمون إلى الحبشة؟", a:["مرة واحدة","هجرتين","ثلاث مرات","أربع مرات"], c:1},
+ {q:"ماذا قرأ جعفر بن أبي طالب أمام النجاشي؟", a:["سورة يوسف","آيات من سورة مريم","سورة الكهف","سورة يس"], c:1},
+ {q:"كم شارك في بيعة العقبة الأولى؟", a:["سبعة","اثنا عشر رجلًا","سبعون رجلًا","عشرون رجلًا"], c:1},
+ {q:"من أرسل النبي ﷺ إلى المدينة بعد بيعة العقبة الأولى؟", a:["مصعب بن عمير","بلال بن رباح","سلمان الفارسي","عمار بن ياسر"], c:0},
+ {q:"ماذا سمى النبي ﷺ أهل المدينة الذين نصروه؟", a:["المهاجرين","الأنصار","الأحزاب","الأقوام"], c:1},
+ {q:"لماذا نام علي بن أبي طالب في فراش النبي ﷺ ليلة الهجرة؟", a:["ليخفي هروبه فقط","ليرد الودائع ويوهم المشركين","لأنه لم يكن يعلم بالخطة","ليقاتل عنه"], c:1},
+ {q:"ما الآية التي تذكر غار ثور؟", a:["ثاني اثنين إذ هما في الغار","وقل جاء الحق","لقد رضي الله عن المؤمنين","إن الله مع الصابرين"], c:0},
+ {q:"بين من أقام النبي ﷺ المؤاخاة في المدينة؟", a:["بين قريش والأنصار","بين المهاجرين والأنصار","بين الأوس والخزرج فقط","بين اليهود والمسلمين"], c:1},
+ {q:"ما اسم الاتفاق الذي نظم شؤون المدينة؟", a:["صحيفة المدينة","ميثاق الأنصار","عهد الحديبية","وثيقة قريش"], c:0},
+ {q:"كم عدد المسلمين في بدر تقريبًا؟", a:["نحو مائة","نحو ثلاثمائة وبضعة عشر","نحو خمسمائة","نحو ألف"], c:1},
+ {q:"كم كان عدد المشركين في بدر تقريبًا؟", a:["نحو ثلاثمائة","نحو خمسمائة","نحو ألف","نحو ألفين"], c:2},
+ {q:"ماذا سمى القرآن يوم بدر؟", a:["يوم الفتح","يوم الفرقان","يوم النصر","يوم الحق"], c:1},
+ {q:"من قتل حمزة رضي الله عنه في أحد؟", a:["أبو سفيان","وحشي بن حرب","خالد بن الوليد","عكرمة"], c:1},
+ {q:"ما سبب تغير مجرى معركة أحد؟", a:["نفاد السهام","ترك بعض الرماة مواقعهم","هروب القادة","كثرة عدد المشركين"], c:1},
+ {q:"من أشهر الصحابيات اللواتي دافعن عن النبي ﷺ في أحد؟", a:["نسيبة بنت كعب","أم سلمة","صفية بنت عبد المطلب","أسماء بنت أبي بكر"], c:0},
+ {q:"كم استمر حصار الأحزاب للمدينة تقريبًا؟", a:["أسبوع","نحو شهر","ثلاثة أشهر","سنة"], c:1},
+ {q:"كيف انتهت غزوة الأحزاب؟", a:["بمعركة كبرى","بصلح","أرسل الله الريح والخوف فانسحبوا","بتدخل النجاشي"], c:2},
+ {q:"كيف وصف القرآن صلح الحديبية؟", a:["نصرًا عظيمًا","فتحًا مبينًا","صلحًا مؤقتًا","عهدًا جديدًا"], c:1},
+ {q:"ما سبب فتح مكة؟", a:["رغبة النبي بالتوسع","نقض قريش صلح الحديبية","طلب أهل مكة","غزوة حنين"], c:1},
+ {q:"ماذا فعل النبي ﷺ عند الكعبة بعد الفتح؟", a:["بنى مسجدًا جديدًا","أزال الأصنام وطهر البيت","أقام فيها","أغلقها"], c:1},
+ {q:"من القبائل التي واجهت المسلمين في حنين؟", a:["هوازن وثقيف","قريش وكنانة","غطفان وأسد","خزاعة وبكر"], c:0},
+ {q:"أين وقف النبي ﷺ في حجة الوداع؟", a:["في منى","في عرفات","في مزدلفة","في المسجد الحرام"], c:1},
+ {q:"ماذا قال النبي ﷺ عن الربا في خطبة الوداع؟", a:["أباحه للحاجة","أبطل ربا الجاهلية","أجّله سنة","لم يذكره"], c:1},
+ {q:"من كان عند النبي ﷺ وقت وفاته؟", a:["فاطمة رضي الله عنها","عائشة رضي الله عنها","أبو بكر","علي"], c:1},
+ {q:"ما اسم أم عبد المطلب؟", a:["سلمى بنت عمرو","هالة بنت وهب","آمنة بنت وهب","فاطمة بنت أسد"], c:0},
+ {q:"من بنى الكعبة مع إسماعيل عليه السلام؟", a:["إبراهيم عليه السلام","آدم عليه السلام","نوح عليه السلام","هود عليه السلام"], c:0},
+ {q:"ما اسم الحجر الموجود في أحد أركان الكعبة؟", a:["الحجر الأسود","حجر إسماعيل","المقام","الملتزم"], c:0},
+];
 
-/* =========================================================
-   BASIC
-========================================================= */
+/* ================= STATE ================= */
+let quiz=[], index=0, score=0, correct=0, time=15, timer=null, locked=false, mode="normal";
+let helpers={5050:3,hint:3,time:3,skip:2};
+let usedFifty=false;
+let currentChallengeCode=null;
+let currentUser=null;
+let shopItems = JSON.parse(localStorage.getItem("sira_shop")||JSON.stringify({
+  '5050':3,'hint':3,'time':3,'skip':2,'theme':0,'title':0
+}));
 
-window.addEventListener("load",()=>{
-  document.body.classList.add("loaded");
-});
-
-/* =========================================================
-   CANVAS
-========================================================= */
-
-const canvas=document.getElementById("heartCanvas");
-const ctx=canvas.getContext("2d");
-
-let W=0,H=0,DPR=1;
-
-function resize(){
-
-  DPR=Math.min(window.devicePixelRatio||1,2);
-
-  W=window.innerWidth;
-  H=window.innerHeight;
-
-  canvas.width=W*DPR;
-  canvas.height=H*DPR;
-
-  canvas.style.width=W+"px";
-  canvas.style.height=H+"px";
-
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+/* ================= LOGIN ================= */
+function loginUser(){
+ const nameElem = document.getElementById("loginName");
+ const ageElem = document.getElementById("loginAge");
+ const countryElem = document.getElementById("loginCountry");
+ const name = nameElem.value.trim();
+ const age = parseInt(ageElem.value);
+ const country = countryElem.value;
+ 
+ if(!name || name.length<2){
+   toast("⚠️ الرجاء إدخال اسم صحيح (حرفين على الأقل)");
+   nameElem.focus();
+   nameElem.style.borderColor = "#a13f3f";
+   setTimeout(()=>nameElem.style.borderColor="",1500);
+   return;
+ }
+ if(!age || age<6 || age>120){
+   toast("⚠️ الرجاء إدخال عمر صحيح (6-120)");
+   ageElem.focus();
+   ageElem.style.borderColor = "#a13f3f";
+   setTimeout(()=>ageElem.style.borderColor="",1500);
+   return;
+ }
+ 
+ const p = getProfile();
+ p.name = name;
+ p.age = age;
+ p.country = country;
+ if(!p.xp){p.xp=0;p.games=0;p.correctPct=null;p.bestStreak=0;p.lastPlay=null;p.badges=[]}
+ saveProfile(p);
+ currentUser = p;
+ document.getElementById("loginModal").style.display = "none";
+ renderProfile();
+ renderStats();
+ toast("🎉 مرحباً بك "+name+"!");
 }
 
-window.addEventListener("resize",resize);
-resize();
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-const reduceMotion=
-  window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-
-const touch=
-  window.matchMedia("(hover:none)").matches;
-
-const COUNT=
-  reduceMotion ? 220 :
-  touch ? 380 :
-  600;
-
-/* =========================================================
-   HEART MATH
-========================================================= */
-
-function heartPoint(t,scale){
-
-  const x=
-    16*Math.pow(Math.sin(t),3);
-
-  const y=-
-    (
-      13*Math.cos(t)
-      -5*Math.cos(2*t)
-      -2*Math.cos(3*t)
-      -Math.cos(4*t)
-    );
-
-  return {
-    x:x*scale,
-    y:y*scale
-  };
-}
-
-/* =========================================================
-   PARTICLES
-========================================================= */
-
-let particles=[];
-
-function createParticles(){
-
-  particles=[];
-
-  const cx=W/2;
-  const cy=H*.46;
-
-  const scale=
-    Math.min(W,H)*
-    (W<520?.021:.025);
-
-  for(let i=0;i<COUNT;i++){
-
-    const t=Math.random()*Math.PI*2;
-
-    /*
-      Randomized interior heart.
-    */
-
-    const frac=.45+Math.random()*.6;
-
-    const targetPoint=
-      heartPoint(t,scale*frac);
-
-    const target={
-      x:cx+targetPoint.x,
-      y:cy+targetPoint.y
-    };
-
-    const angle=Math.random()*Math.PI*2;
-
-    const distance=
-      Math.max(W,H)*
-      (.65+Math.random()*.7);
-
-    const start={
-      x:cx+Math.cos(angle)*distance,
-      y:cy+Math.sin(angle)*distance
-    };
-
-    particles.push({
-
-      x:start.x,
-      y:start.y,
-
-      baseX:target.x,
-      baseY:target.y,
-
-      size:.7+Math.random()*2.3,
-
-      speed:
-        .018+
-        Math.random()*.035,
-
-      hue:Math.random(),
-
-      phase:
-        Math.random()*Math.PI*2,
-
-      twinkle:
-        .4+Math.random()*1.4
-
-    });
-
-  }
-}
-
-createParticles();
-
-window.addEventListener("resize",createParticles);
-
-/* =========================================================
-   COLORS
-========================================================= */
-
-function particleColor(h,a){
-
-  const r=224+(255-224)*h;
-  const g=38+(100-38)*h;
-  const b=63+(130-63)*h;
-
-  return `rgba(${r|0},${g|0},${b|0},${a})`;
-}
-
-/* =========================================================
-   STAR BACKGROUND
-========================================================= */
-
-const starCanvas=document.getElementById("stars");
-const sctx=starCanvas.getContext("2d");
-
-let stars=[];
-
-function resizeStars(){
-
-  starCanvas.width=W*DPR;
-  starCanvas.height=H*DPR;
-
-  sctx.setTransform(DPR,0,0,DPR,0,0);
-
-  stars=[];
-
-  const amount=
-    Math.min(180,Math.floor(W*H/8000));
-
-  for(let i=0;i<amount;i++){
-
-    stars.push({
-      x:Math.random()*W,
-      y:Math.random()*H,
-      r:.3+Math.random()*1.1,
-      phase:Math.random()*Math.PI*2,
-      speed:.3+Math.random()*1
-    });
-
-  }
-}
-
-resizeStars();
-
-window.addEventListener("resize",resizeStars);
-
-function drawStars(time){
-
-  sctx.clearRect(0,0,W,H);
-
-  for(const star of stars){
-
-    const alpha=
-      .12+
-      (Math.sin(time*.001*star.speed+star.phase)+1)*.18;
-
-    sctx.beginPath();
-
-    sctx.arc(
-      star.x,
-      star.y,
-      star.r,
-      0,
-      Math.PI*2
-    );
-
-    sctx.fillStyle=
-      `rgba(255,210,220,${alpha})`;
-
-    sctx.fill();
-
-  }
-}
-
-/* =========================================================
-   ANIMATION STATE
-========================================================= */
-
-const startTime=performance.now();
-
-const duration=
-  reduceMotion ? 500 : 2800;
-
-let assembled=false;
-let opened=false;
-let pulse=0;
-let burst=0;
-
-function assembledHeart(){
-
-  if(assembled)return;
-
-  assembled=true;
-
-  document
-    .getElementById("brand")
-    .classList.add("show");
-
-  document
-    .getElementById("prompt")
-    .classList.add("show");
-
-  document
-    .getElementById("soundToggle")
-    .classList.add("show");
-}
-
-/* =========================================================
-   ANIMATION
-========================================================= */
-
-function animate(now){
-
-  const elapsed=now-startTime;
-
-  ctx.clearRect(0,0,W,H);
-
-  drawStars(now);
-
-  const cx=W/2;
-  const cy=H*.46;
-
-  /* central glow */
-
-  const glow=
-    ctx.createRadialGradient(
-      cx,cy,0,
-      cx,cy,
-      Math.min(W,H)*.38
-    );
-
-  glow.addColorStop(
-    0,
-    "rgba(224,38,63,.17)"
-  );
-
-  glow.addColorStop(
-    .45,
-    "rgba(224,38,63,.04)"
-  );
-
-  glow.addColorStop(
-    1,
-    "rgba(224,38,63,0)"
-  );
-
-  ctx.fillStyle=glow;
-  ctx.fillRect(0,0,W,H);
-
-  const progress=
-    Math.min(1,elapsed/duration);
-
-  if(progress>=1)
-    assembledHeart();
-
-  /* heartbeat */
-
-  if(assembled){
-
-    const beatTime=now*.001;
-
-    pulse=
-      Math.max(
-        0,
-        Math.sin(beatTime*3.05)
-      )*.5;
-
-  }
-
-  if(burst>0){
-
-    pulse=Math.max(pulse,burst);
-
-    burst*=.91;
-
-    if(burst<.01)
-      burst=0;
-  }
-
-  /* particles */
-
-  for(const p of particles){
-
-    const ease=
-      reduceMotion?.35:
-      p.speed;
-
-    p.x+=
-      (p.baseX-p.x)*ease;
-
-    p.y+=
-      (p.baseY-p.y)*ease;
-
-    const wave=
-      assembled
-      ? Math.sin(now*.0015+p.phase)
-      : 0;
-
-    const offsetX=
-      assembled
-      ? (p.baseX-cx)*.018*pulse
-      : 0;
-
-    const offsetY=
-      assembled
-      ? (p.baseY-cy)*.018*pulse
-      : 0;
-
-    const alpha=
-      .58+
-      Math.max(0,wave)*.35;
-
-    const radius=
-      p.size+
-      Math.max(0,wave)*.7+
-      pulse*.35;
-
-    ctx.beginPath();
-
-    ctx.arc(
-      p.x+offsetX,
-      p.y+offsetY,
-      radius,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fillStyle=
-      particleColor(p.hue,alpha);
-
-    ctx.shadowColor=
-      "rgba(255,49,80,.65)";
-
-    ctx.shadowBlur=
-      5+
-      pulse*8;
-
-    ctx.fill();
-
-  }
-
-  ctx.shadowBlur=0;
-
-  requestAnimationFrame(animate);
-}
-
-requestAnimationFrame(animate);
-
-/* =========================================================
-   CARD
-========================================================= */
-
-const overlay=
-  document.getElementById("overlay");
-
-const card=
-  document.getElementById("card");
-
-const prompt=
-  document.getElementById("prompt");
-
-function openCard(){
-
-  if(opened||!assembled)return;
-
-  opened=true;
-
-  overlay.classList.add("show");
-
-  setTimeout(()=>{
-    card.classList.add("reveal");
-  },180);
-
-  if(navigator.vibrate){
-    navigator.vibrate(18);
-  }
-
-  document.getElementById("flash")
-    .classList.remove("active");
-
-  void document.getElementById("flash").offsetWidth;
-
-  document.getElementById("flash")
-    .classList.add("active");
-
-}
-
-function closeCard(){
-
-  opened=false;
-
-  card.classList.remove("reveal");
-
-  overlay.classList.remove("show");
-
-}
-
-document
-  .getElementById("cardClose")
-  .addEventListener("click",closeCard);
-
-overlay.addEventListener("click",(e)=>{
-
-  if(e.target===overlay)
-    closeCard();
-
-});
-
-window.addEventListener("keydown",(e)=>{
-
-  if(e.key==="Escape"&&opened)
-    closeCard();
-
-  if(
-    (e.key==="Enter"||e.key===" ") &&
-    assembled &&
-    !opened
-  ){
-
-    e.preventDefault();
-    openCard();
-
-  }
-
-});
-
-/* =========================================================
-   TOUCH / CLICK / DOUBLE TAP
-========================================================= */
-
-let lastTap=0;
-
-function heartInteraction(){
-
-  burst=1.6;
-
-  if(navigator.vibrate)
-    navigator.vibrate(12);
-
-  if(assembled)
-    openCard();
-
-}
-
-canvas.addEventListener("click",heartInteraction);
-
-canvas.addEventListener(
-  "touchstart",
-  e=>{
-    e.preventDefault();
-
-    const now=Date.now();
-
-    if(now-lastTap<320){
-
-      burst=3;
-
-      if(navigator.vibrate)
-        navigator.vibrate([20,30,45]);
-
+// Fix: Enter key for login
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    const loginModal = document.getElementById("loginModal");
+    if (loginModal.style.display !== "none" && loginModal.style.display !== "") {
+      loginUser();
     }
-
-    lastTap=now;
-
-    heartInteraction();
-
-  },
-  {passive:false}
-);
-
-/* =========================================================
-   DESKTOP PARALLAX
-========================================================= */
-
-if(!touch&&!reduceMotion){
-
-  document.addEventListener("mousemove",(e)=>{
-
-    if(!opened)return;
-
-    const rect=
-      card.getBoundingClientRect();
-
-    const x=
-      (e.clientX-(rect.left+rect.width/2))
-      /(rect.width/2);
-
-    const y=
-      (e.clientY-(rect.top+rect.height/2))
-      /(rect.height/2);
-
-    const rx=
-      Math.max(-1,Math.min(1,-y))*5;
-
-    const ry=
-      Math.max(-1,Math.min(1,x))*6;
-
-    card.style.transform=
-      `translateY(0)
-       scale(1)
-       rotateX(${rx}deg)
-       rotateY(${ry}deg)`;
-
-  });
-
-  overlay.addEventListener("mouseleave",()=>{
-
-    if(opened){
-
-      card.style.transform=
-        "translateY(0) scale(1) rotateX(0) rotateY(0)";
-
-    }
-
-  });
-
-}
-
-/* =========================================================
-   EMBERS
-========================================================= */
-
-const embers=
-  document.getElementById("embers");
-
-for(let i=0;i<24;i++){
-
-  const ember=
-    document.createElement("div");
-
-  ember.className="ember";
-
-  ember.style.left=
-    Math.random()*100+"%";
-
-  ember.style.animationDuration=
-    4+Math.random()*7+"s";
-
-  ember.style.animationDelay=
-    Math.random()*8+"s";
-
-  ember.style.setProperty(
-    "--drift",
-    (Math.random()*100-50)+"px"
-  );
-
-  embers.appendChild(ember);
-}
-
-/* =========================================================
-   COPY
-========================================================= */
-
-const copyBtn=
-  document.getElementById("copyBtn");
-
-const copyLabel=
-  document.getElementById("copyLabel");
-
-const message=
-`You are exactly the kind of person the world needs more of.
-Keep going. It looks good on you.`;
-
-copyBtn.addEventListener("click",async()=>{
-
-  try{
-
-    if(navigator.clipboard){
-
-      await navigator.clipboard.writeText(message);
-
-    }else{
-
-      const area=
-        document.createElement("textarea");
-
-      area.value=message;
-
-      document.body.appendChild(area);
-
-      area.select();
-
-      document.execCommand("copy");
-
-      area.remove();
-
-    }
-
-    copyLabel.textContent="Copied ✓";
-
-    if(navigator.vibrate)
-      navigator.vibrate(10);
-
-    setTimeout(()=>{
-
-      copyLabel.textContent=
-        "Copy this message";
-
-    },1800);
-
-  }catch(err){
-
-    copyLabel.textContent=
-      "Copy manually";
-
   }
-
 });
 
-/* =========================================================
-   AUDIO HEARTBEAT
-========================================================= */
+function getProfile(){
+ try {
+   return JSON.parse(localStorage.getItem("sira_profile")||JSON.stringify({name:"",age:0,country:"",xp:0,games:0,correctPct:null,bestStreak:0,lastPlay:null,badges:[]}));
+ } catch(e) {
+   return {name:"",age:0,country:"",xp:0,games:0,correctPct:null,bestStreak:0,lastPlay:null,badges:[]};
+ }
+}
+function saveProfile(p){localStorage.setItem("sira_profile",JSON.stringify(p))}
 
-let audio=null;
-let sound=false;
-let interval=null;
-
-function initAudio(){
-
-  if(!audio){
-
-    audio=
-      new (window.AudioContext||
-           window.webkitAudioContext)();
-
-  }
-
-  if(audio.state==="suspended")
-    audio.resume();
-
+function renderProfile(){
+ const p=getProfile();
+ if(!p.name || !p.age){
+   document.getElementById("loginModal").style.display = "flex";
+   return;
+ }
+ currentUser=p;
+ document.getElementById("profName").textContent=p.name;
+ document.getElementById("profAge").textContent=p.age+" سنة";
+ const countryNames = {'SA':'🇸🇦','EG':'🇪🇬','DZ':'🇩🇿','MA':'🇲🇦','TN':'🇹🇳','LY':'🇱🇾','SD':'🇸🇩','SY':'🇸🇾','IQ':'🇮🇶','JO':'🇯🇴','PS':'🇵🇸','LB':'🇱🇧','KW':'🇰🇼','QA':'🇶🇦','AE':'🇦🇪','OM':'🇴🇲','BH':'🇧🇭','YE':'🇾🇪','TR':'🇹🇷','IR':'🇮🇷','PK':'🇵🇰','IN':'🇮🇳','ID':'🇮🇩','MY':'🇲🇾','US':'🇺🇸','UK':'🇬🇧','FR':'🇫🇷','DE':'🇩🇪'};
+ document.getElementById("profCountry").textContent = p.country ? countryNames[p.country]||'🌍' : '';
+ document.getElementById("topAvatar").textContent = p.age<15?"🧒":p.age<25?"👦":"👨";
+ document.getElementById("profAvatar").textContent = p.age<15?"🧒":p.age<25?"👦":"👨";
+ const lvl=Math.max(1,Math.floor(p.xp/300)+1);
+ document.getElementById("profLevel").textContent=lvl;
+ const cur=p.xp%300;
+ document.getElementById("xpFill").style.width=(cur/300*100)+"%";
+ document.getElementById("xpNow").textContent=cur+" XP";
+ document.getElementById("xpNext").textContent="300 XP";
+ document.getElementById("statGames").textContent=p.games||0;
+ document.getElementById("statAcc").textContent=p.correctPct==null?"—":p.correctPct+"%";
+ document.getElementById("statStreak").textContent=p.bestStreak||0;
+ document.getElementById("topStreak").textContent=p.bestStreak||0;
+ updateBadges(p.badges||[]);
 }
 
-function thump(volume){
-
-  if(!audio)return;
-
-  const t=audio.currentTime;
-
-  const oscillator=
-    audio.createOscillator();
-
-  const gain=
-    audio.createGain();
-
-  oscillator.type="sine";
-
-  oscillator.frequency.setValueAtTime(
-    75,t
-  );
-
-  oscillator.frequency.exponentialRampToValueAtTime(
-    40,
-    t+.15
-  );
-
-  gain.gain.setValueAtTime(
-    .0001,
-    t
-  );
-
-  gain.gain.exponentialRampToValueAtTime(
-    volume,
-    t+.018
-  );
-
-  gain.gain.exponentialRampToValueAtTime(
-    .0001,
-    t+.28
-  );
-
-  oscillator
-    .connect(gain)
-    .connect(audio.destination);
-
-  oscillator.start(t);
-
-  oscillator.stop(t+.3);
+function updateBadges(badges){
+ const allBadges = ['firstWin','streak10','q100','quick','perfect'];
+ const names = {'firstWin':'أول انتصار','streak10':'10 متتالية','q100':'100 سؤال','quick':'إجابة سريعة','perfect':'إجابة مثالية'};
+ document.querySelectorAll('#badgesRow div').forEach(el=>{
+   const b = el.dataset.badge;
+   if(badges.includes(b)){
+     el.classList.add('unlocked');
+     el.classList.remove('locked');
+     el.title = '✅ '+names[b];
+   } else {
+     el.classList.add('locked');
+     el.classList.remove('unlocked');
+     el.title = '🔒 '+names[b]+' (لم يُفتح بعد)';
+   }
+ });
 }
 
-function startHeartbeat(){
-
-  stopHeartbeat();
-
-  thump(.11);
-
-  interval=setInterval(()=>{
-
-    thump(.15);
-
-    setTimeout(()=>{
-      thump(.08);
-    },190);
-
-  },1050);
-
+function checkBadges(score, correct, total){
+ const p=getProfile();
+ const badges=p.badges||[];
+ let newBadge=null;
+ if(correct===total && total>=5 && !badges.includes('perfect')){badges.push('perfect');newBadge='🌟 إجابة مثالية!';}
+ if(correct===total && total>=3 && !badges.includes('firstWin')){badges.push('firstWin');newBadge='🏅 أول انتصار!';}
+ if(correct>=10 && !badges.includes('streak10')){badges.push('streak10');newBadge='🔥 10 إجابات متتالية!';}
+ if(p.games>=3 && p.games%3===0 && !badges.includes('q100')){badges.push('q100');newBadge='🕌 100 سؤال!';}
+ if(time < 3 && correct>=3 && !badges.includes('quick')){badges.push('quick');newBadge='⚡ إجابة سريعة جداً!';}
+ if(newBadge){
+   p.badges=badges;
+   saveProfile(p);
+   document.getElementById('newBadge').classList.remove('hidden');
+   document.getElementById('newBadgeText').textContent=newBadge;
+   toast("🎉 إنجاز جديد: "+newBadge);
+ }
 }
 
-function stopHeartbeat(){
-
-  if(interval){
-
-    clearInterval(interval);
-    interval=null;
-
-  }
-
-}
-
-const soundToggle=
-  document.getElementById("soundToggle");
-
-soundToggle.addEventListener("click",()=>{
-
-  initAudio();
-
-  sound=!sound;
-
-  soundToggle.classList.toggle(
-    "muted",
-    !sound
-  );
-
-  if(sound)
-    startHeartbeat();
-  else
-    stopHeartbeat();
-
-});
-
-/* =========================================================
-   VISIBILITY
-========================================================= */
-
-document.addEventListener(
-  "visibilitychange",
-  ()=>{
-
-    if(document.hidden){
-
-      stopHeartbeat();
-
-    }else if(sound){
-
-      startHeartbeat();
-
-    }
-
-  }
-);
-
-})();
-</script>
-
-</body>
-  </html>
+/* ================= STATS ================= */
+function renderStats(){
+ const p=getProfile();
+ const all=getPar
