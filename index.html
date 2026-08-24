@@ -1,88 +1,420 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>مسابقة السيرة النبوية</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-body{font-family:Arial;background:#070f0c;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
-.box{background:#0e1f18;border:2px solid #e8c477;border-radius:20px;padding:40px;max-width:400px;width:100%;text-align:center}
-input,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #24473b;background:#0b1811;color:#fff;font-size:16px}
-button{width:100%;padding:14px;background:#e8c477;color:#152016;border:0;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer}
-button:hover{transform:scale(1.02)}
-h1{color:#e8c477}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#122a20;border:1px solid #e8c477;padding:12px 24px;border-radius:10px;display:none}
-</style>
-</head>
-<body>
-<div class="box">
-  <h1>🕌 مسابقة السيرة</h1>
-  <p>أدخل بياناتك للدخول</p>
-  <input id="name" placeholder="الاسم">
-  <input id="age" type="number" placeholder="العمر">
-  <select id="country">
-    <option value="">اختر دولتك</option>
-    <option value="DZ">🇩🇿 الجزائر</option>
-    <option value="SA">🇸🇦 السعودية</option>
-    <option value="EG">🇪🇬 مصر</option>
-    <option value="MA">🇲🇦 المغرب</option>
-    <option value="TN">🇹🇳 تونس</option>
-  </select>
-  <button onclick="login()">دخول 🚀</button>
-  <p style="font-size:12px;color:#93a89c;margin-top:10px">بياناتك تحفظ محلياً وفي السحابة</p>
-</div>
-<div id="toast" class="toast"></div>
-
-<script>
-const supabaseUrl = 'https://qdgbzmbpqsrvdivqblft.supabase.co';
-const supabaseKey = 'sb_publishable_wfpPsmIUF6Q5DDCuzP95UA_3-uGk2JN';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 3000);
+if(time<3 && correct>=3 && !badges.includes('quick')){badges.push('quick');newBadge='⚡ إجابة سريعة جداً!';}
+ if(newBadge){
+   p.badges=badges;
+   saveProfile(p);
+   document.getElementById('newBadge').classList.remove('hidden');
+   document.getElementById('newBadgeText').textContent=newBadge;
+   toast("🎉 إنجاز جديد: "+newBadge);
+ }
 }
 
-async function login() {
-  const name = document.getElementById('name').value.trim();
-  const age = parseInt(document.getElementById('age').value);
-  const country = document.getElementById('country').value;
-  
-  if(!name || name.length < 2) {
-    toast('⚠️ أدخل اسم صحيح');
-    return;
-  }
-  if(!age || age < 6 || age > 120) {
-    toast('⚠️ أدخل عمر صحيح');
-    return;
-  }
-  
-  // حفظ محلياً
-  const profile = { name, age, country, xp: 0, games: 0, correctPct: null, bestStreak: 0, badges: [] };
-  localStorage.setItem('sira_profile', JSON.stringify(profile));
-  
-  // حفظ في Supabase (حتى لو فشل)
-  try {
-    await supabase.from('players').upsert({
-      name, age, country: country || '', xp: 0, games: 0, correct_pct: null, best_streak: 0, badges: []
-    });
-  } catch(e) {
-    console.log('Supabase save failed but local works');
-  }
-  
-  toast('✅ مرحباً بك ' + name + '!');
-  
-  // تحويل للصفحة الرئيسية
-  document.querySelector('.box').innerHTML = `
-    <h1>✅ تم الدخول بنجاح!</h1>
-    <p style="color:#93a89c">مرحباً بك ${name} (${age} سنة)</p>
-    <p style="color:#e8c477;font-size:14px">تم حفظ بياناتك في السحابة ☁️</p>
-    <button onclick="location.reload()">العب الآن 🎮</button>
-  `;
+/* ================= STATS ================= */
+function renderStats(){
+ const all=getParticipants();
+ document.getElementById("statTotalPlayers").textContent = new Set(all.map(x=>x.name)).size || 0;
+ const today = new Date().toDateString();
+ document.getElementById("statTodayPlayers").textContent = all.filter(x=>new Date(x.date).toDateString()===today).length || 0;
+ document.getElementById("statTotalGames").textContent = all.length || 0;
+ document.getElementById("statTotalQuestions").textContent = all.reduce((sum,x)=>sum+(x.total||0),0) || 0;
+ const avg = all.length?Math.round(all.reduce((sum,x)=>sum+(x.score||0),0)/all.length):0;
+ document.getElementById("statAvgScore").textContent = avg;
+ const countries = new Set(all.map(x=>x.country).filter(c=>c));
+ document.getElementById("statCountries").textContent = countries.size || 0;
+ renderChart();
 }
+
+function renderChart(){
+ const all=getParticipants();
+ const last7 = [];
+ for(let i=6;i>=0;i--){
+   const d = new Date();d.setDate(d.getDate()-i);
+   const key = d.toDateString();
+   const count = all.filter(x=>new Date(x.date).toDateString()===key).length;
+   last7.push({label:(i===0?'اليوم':d.toLocaleDateString('ar',{weekday:'short'})),count});
+ }
+ const max = Math.max(1,...last7.map(x=>x.count));
+ const chart = document.getElementById('statsChart');
+ chart.innerHTML = last7.map(d=>`
+   <div class="bar">
+     <div class="fill" style="height:${(d.count/max)*80+5}%;width:100%;border-radius:4px 4px 0 0"></div>
+     <div class="label">${d.label}</div>
+   </div>
+ `).join('');
+}
+
+/* ================= LEADERBOARD ================= */
+function getFilteredParticipants(filter){
+ const all=getParticipants();
+ if(filter==='all') return all;
+ return all.filter(p=>{
+   if(filter==='under15') return p.age<15;
+   if(filter==='15to25') return p.age>=15 && p.age<=25;
+   if(filter==='over25') return p.age>25;
+   return true;
+ });
+}
+
+function renderLeaderboard(filter){
+ const list=getFilteredParticipants(filter);
+ const sorted=list.slice().sort((a,b)=>b.score-a.score).slice(0,10);
+ const labels={all:"كل الأعمار",under15:"أقل من 15",'15to25':'15-25',over25:"أكثر من 25"};
+ document.getElementById("lbFilterLabel").textContent=labels[filter]||"كل الأعمار";
+ const lbList = document.getElementById("lbList");
+ if(sorted.length===0){
+   lbList.innerHTML="<p class='muted center'>لا يوجد مشاركون في هذه الفئة</p>";
+   return;
+ }
+ lbList.innerHTML=sorted.map((row,i)=>{
+   const rankClass=i===0?"g1":i===1?"g2":i===2?"g3":"";
+   return `<div class="lbrow"><span class="rank ${rankClass}">${i+1}</span><span class="lbavatar">${row.age<15?"🧒":row.age<25?"👦":"👨"}</span><span class="lbname">${esc(row.name)} <span class="lbage">${row.age}س</span></span><span class="lbxp">${row.score} XP</span></div>`;
+ }).join("");
+}
+
+document.getElementById("lbTabs").addEventListener("click",e=>{
+ if(e.target.tagName!=="BUTTON")return;
+ [...e.target.parentNode.children].forEach(b=>b.classList.remove("active"));
+ e.target.classList.add("active");
+ renderLeaderboard(e.target.dataset.t);
+});
+
+function renderLevels(){
+ document.getElementById("levelsRow").innerHTML=LEVELS.map((l,i)=>{
+   const cls=l.current?"current":(l.done?"done":"");
+   const inner=l.done?(i+1):(l.current?(i+1):"🔒");
+   const stars=l.stars?"★".repeat(l.stars)+"☆".repeat(3-l.stars):"";
+   return `<div class="lvl ${cls}"><div class="lvlcircle">${inner}</div><small>${l.n}</small><div class="stars">${stars}</div></div>`;
+ }).join("");
+}
+
+/* ================= SHOP ================= */
+function openShop(){
+ hideAll();document.getElementById("shop").classList.remove("hidden");
+}
+
+function buyItem(item){
+ const p=getProfile();
+ const prices = {'5050':100,'hint':80,'time':120,'skip':150,'theme':500,'title':300};
+ if(p.xp < prices[item]){toast("❌ نقاط XP غير كافية!");return}
+ p.xp -= prices[item];
+ if(item==='theme'){document.querySelector('.modal-box h1').style.color='var(--gold)';toast("🎨 تم تطبيق الثيم الذهبي!")}
+ else if(item==='title'){document.getElementById('profName').textContent = '👑 '+p.name;toast("👑 لقب مميز أُضيف!")}
+ else {shopItems[item]=(shopItems[item]||0)+3;toast("✅ تم شراء المساعدة!")}
+ saveProfile(p);
+ localStorage.setItem("sira_shop",JSON.stringify(shopItems));
+ renderProfile();
+}
+
+/* ================= CHALLENGE ================= */
+function newChallengeCode(){
+ const code="SIRA-"+Math.random().toString(16).slice(2,6).toUpperCase()+"-"+Math.floor(100+Math.random()*900);
+ document.getElementById("challengeCode").textContent=code;
+ currentChallengeCode=code;
+ const qs=[...QUESTIONS].sort(()=>Math.random()-0.5).slice(0,10);
+ const challengeData={code,questions:qs,results:[],created:new Date().toISOString()};
+ localStorage.setItem("sira_challenge_"+code,JSON.stringify(challengeData));
+ navigator.clipboard?.writeText(code).catch(()=>{});
+ toast("✅ تم إنشاء التحدي: "+code);
+}
+
+function joinChallenge(){
+ const codeInput = document.getElementById("challengeInput");
+ const code = codeInput.value.trim().toUpperCase();
+ if(!code){toast("⚠️ أدخل كود التحدي أولاً");codeInput.focus();return}
+ const data=localStorage.getItem("sira_challenge_"+code);
+ if(!data){toast("❌ الكود غير صحيح أو منتهي الصلاحية");return}
+ const challenge=JSON.parse(data);
+ if(!challenge.questions || challenge.questions.length===0){toast("❌ هذا التحدي لا يحتوي على أسئلة");return}
+ currentChallengeCode=code;
+ quiz=challenge.questions.slice();
+ openQuiz('challenge');
+ codeInput.value="";
+ toast("🎯 تم الانضمام للتحدي!");
+}
+
+function shareChallengeWhatsApp(){
+ const code=document.getElementById("challengeCode").textContent;
+ const p=getProfile();
+ const url="https://wa.me/?text=🕌%20انضم%20إلى%20تحدي%20السيرة%20النبوية%20معي!%0Aكود%20التحدي:%20"+code+"%0Aمن%20"+p.name;
+ window.open(url,"_blank");
+}
+
+function shareChallengeTwitter(){
+ const code=document.getElementById("challengeCode").textContent;
+ const p=getProfile();
+ const url="https://twitter.com/intent/tweet?text=🕌%20انضم%20إلى%20تحدي%20السيرة%20النبوية%20مع%20"+encodeURIComponent(p.name)+"!%20كود:%20"+code;
+ window.open(url,"_blank");
+}
+
+function copyChallengeCode(){
+ const code=document.getElementById("challengeCode").textContent;
+ navigator.clipboard?.writeText(code).then(()=>toast("📋 تم نسخ الكود")).catch(()=>toast("اضغط Ctrl+C لنسخ الكود"));
+}
+
+/* ================= QUIZ ENGINE ================= */
+function openQuiz(m){
+ const p=getProfile();
+ if(!p.name || !p.age){toast("⚠️ الرجاء تسجيل الدخول أولاً");return}
+ helpers['5050'] = shopItems['5050'] || 3;
+ helpers['hint'] = shopItems['hint'] || 3;
+ helpers['time'] = shopItems['time'] || 3;
+ helpers['skip'] = shopItems['skip'] || 2;
+ if(m!=='challenge' || !quiz || quiz.length===0){
+   const count=m==='daily'?10:10;
+   quiz=[...QUESTIONS].sort(()=>Math.random()-0.5).slice(0,count);
+ }
+ index=0;score=0;correct=0;
+ hideAll();document.getElementById("quiz").classList.remove("hidden");
+ document.getElementById("qTotal").textContent=quiz.length;
+ refreshHelperUI();
+ showQuestion();
+}
+
+function refreshHelperUI(){
+ document.getElementById("c5050").textContent=helpers["5050"];
+ document.getElementById("cHint").textContent=helpers.hint;
+ document.getElementById("cTime").textContent=helpers.time;
+ document.getElementById("cSkip").textContent=helpers.skip;
+ document.getElementById("h5050").disabled=helpers["5050"]<=0;
+ document.getElementById("hHint").disabled=helpers.hint<=0;
+ document.getElementById("hTime").disabled=helpers.time<=0;
+ document.getElementById("hSkip").disabled=helpers.skip<=0;
+}
+
+function showQuestion(){
+ clearInterval(timer);locked=false;time=15;usedFifty=false;
+ const x=quiz[index];
+ document.getElementById("qNum").textContent=index+1;
+ document.getElementById("question").textContent=x.q;
+ document.getElementById("score").textContent=score;
+ document.getElementById("feedback").textContent="";
+ document.getElementById("progress").style.width=((index)/quiz.length*100)+"%";
+ const box=document.getElementById("answers");box.innerHTML="";
+ x.a.forEach((ans,i)=>{
+   const b=document.createElement("button");b.className="answer";b.textContent=ans;b.dataset.i=i;
+   b.onclick=()=>answer(i,b);box.appendChild(b);
+ });
+ document.getElementById("timer").textContent=time;updateRing();
+ refreshHelperUI();
+ timer=setInterval(()=>{
+   time--;document.getElementById("timer").textContent=time;updateRing();
+   if(time<=0){clearInterval(timer);answer(-1,null)}
+ },1000);
+}
+function updateRing(){
+ const deg=Math.max(0,(time/15)*360);
+ document.getElementById("timerRing").style.background=`conic-gradient(var(--gold) ${deg}deg,#20382e ${deg}deg)`;
+}
+function answer(choice,btn){
+ if(locked)return;locked=true;clearInterval(timer);
+ const x=quiz[index],buttons=[...document.getElementById("answers").children];
+ buttons.forEach(b=>{b.disabled=true;if(+b.dataset.i===x.c)b.classList.add("correct")});
+ if(choice===x.c){
+   correct++;const gained=100+time*5;score+=gained;
+   if(btn)btn.classList.add("correct");
+   document.getElementById("feedback").innerHTML="✅ إجابة صحيحة! +"+gained+" XP"+(x.info?"<br><span class='muted'>📖 "+x.info+"</span>":"");
+   toast("⭐ إجابة صحيحة!");
+ }else{
+   document.getElementById("feedback").innerHTML="❌ الإجابة الصحيحة: "+x.a[x.c]+(x.info?"<br><span class='muted'>📖 "+x.info+"</span>":"");
+   if(btn)btn.classList.add("wrong");
+   toast("💪 حاول أفضل في السؤال القادم");
+ }
+ document.getElementById("score").textContent=score;
+ setTimeout(()=>{index++;if(index<quiz.length)showQuestion();else finish()},x.info?1600:900);
+}
+function useHelper(kind){
+ if(locked||helpers[kind]<=0)return;
+ const x=quiz[index];
+ if(kind==="5050"){
+   if(usedFifty)return;
+   helpers["5050"]--;usedFifty=true;
+   const wrongIdx=[...quiz[index].a.keys()].filter(i=>i!==x.c);
+   wrongIdx.sort(()=>Math.random()-0.5);
+   const toHide=wrongIdx.slice(0,2);
+   [...document.getElementById("answers").children].forEach(b=>{if(toHide.includes(+b.dataset.i)){b.style.visibility="hidden"}});
+ }else if(kind==="hint"){
+   helpers.hint--;
+   document.getElementById("feedback").textContent="💡 "+(x.info||"فكّر في السياق التاريخي للسؤال جيدًا.");
+ }else if(kind==="time"){
+   helpers.time--;time+=10;document.getElementById("timer").textContent=time;updateRing();
+ }else if(kind==="skip"){
+   helpers.skip--;
+   clearInterval(timer);
+   const newQ=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+   let tries=0;
+   let q=newQ;
+   while(q.q===quiz[index].q && tries<10){q=QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];tries++;}
+   quiz[index]=q;
+   showQuestion();return;
+ }
+ refreshHelperUI();
+}
+
+function level(s){
+ if(s>=1100)return"💎 Diamond";
+ if(s>=850)return"🥇 Gold";
+ if(s>=600)return"🥈 Silver";
+ return"🥉 Bronze";
+}
+function finish(){
+ hideAll();document.getElementById("result").classList.remove("hidden");
+ const p=getProfile();
+ document.getElementById("resultName").textContent=p.name+" ("+p.age+" سنة)";
+ document.getElementById("resultScore").textContent=score+" XP";
+ document.getElementById("resultCorrect").textContent=correct;
+ document.getElementById("resultTotal").textContent=quiz.length;
+ document.getElementById("resultLevel").textContent=level(score);
+
+ p.xp=(p.xp||0)+score;
+ p.games=(p.games||0)+1;
+ const pct=Math.round(correct/quiz.length*100);
+ p.correctPct=p.correctPct==null?pct:Math.round((p.correctPct+pct)/2);
+ p.bestStreak=Math.max(p.bestStreak||0,correct);
+ p.lastPlay=new Date().toISOString();
+ saveProfile(p);
+
+ checkBadges(score, correct, quiz.length);
+
+ saveParticipant({name:p.name,age:p.age,country:p.country||'unknown',score,correct,total:quiz.length,level:level(score),date:new Date().toISOString()});
+
+ if(currentChallengeCode){
+   const data=localStorage.getItem("sira_challenge_"+currentChallengeCode);
+   if(data){
+     const challenge=JSON.parse(data);
+     challenge.results.push({name:p.name,age:p.age,score,correct,total:quiz.length,date:new Date().toISOString()});
+     localStorage.setItem("sira_challenge_"+currentChallengeCode,JSON.stringify(challenge));
+     if(challenge.results.length>1){
+       document.getElementById("challengeCompare").classList.remove("hidden");
+       let html="";
+       const sorted=[...challenge.results].sort((a,b)=>b.score-a.score);
+       sorted.forEach((r,i)=>{
+         const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+         html+=`<div style="padding:6px 0;border-bottom:1px solid var(--border)">${medal} <b>${esc(r.name)}</b> (${r.age}س): ${r.score} XP (${r.correct}/${r.total})</div>`;
+       });
+       document.getElementById("compareResult").innerHTML=html;
+     }
+   }
+ }
+ renderStats();
+}
+
+/* ================= ADMIN ================= */
+function getParticipants(){return JSON.parse(localStorage.getItem("quiz_participants")||"[]")}
+function saveParticipant(p){const a=getParticipants();a.push(p);localStorage.setItem("quiz_participants",JSON.stringify(a))}
+function adminLogin(){
+ if(document.getElementById("adminPass").value!=="CHANGE_ME_2026"){alert("❌ كلمة المرور غير صحيحة");return}
+ document.getElementById("loginBox").classList.add("hidden");
+ document.getElementById("dashboard").classList.remove("hidden");
+ renderDashboard();
+}
+function renderDashboard(){
+ const a=getParticipants();
+ document.getElementById("participants").textContent=new Set(a.map(x=>x.name)).size;
+ document.getElementById("games").textContent=a.length;
+ document.getElementById("best").textContent=a.reduce((m,x)=>Math.max(m,x.score),0);
+ const today=new Date().toDateString();
+ document.getElementById("today").textContent=a.filter(x=>new Date(x.date).toDateString()===today).length;
+ document.getElementById("participantsTable").innerHTML=a.slice().reverse().map(x=>`<tr><td>${esc(x.name)}</td><td>${x.age||'--'}</td><td>${x.country||'--'}</td><td>${x.score}</td><td>${x.correct}/${x.total}</td><td>${x.level}</td><td>${new Date(x.date).toLocaleString("ar-DZ")}</td></tr>`).join("");
+}
+function clearAllData(){
+ if(confirm("⚠️ هل أنت متأكد من حذف جميع البيانات؟")){
+   localStorage.removeItem("quiz_participants");
+   localStorage.removeItem("sira_profile");
+   localStorage.removeItem("sira_shop");
+   const keys=Object.keys(localStorage);
+   keys.forEach(k=>{if(k.startsWith("sira_challenge_"))localStorage.removeItem(k)});
+   location.reload();
+ }
+}
+function exportData(){
+ const data = {
+   participants: getParticipants(),
+   profile: getProfile(),
+   shop: JSON.parse(localStorage.getItem("sira_shop")||"{}"),
+   challenges: Object.keys(localStorage).filter(k=>k.startsWith("sira_challenge_")).reduce((o,k)=>{o[k]=JSON.parse(localStorage.getItem(k));return o},{})
+ };
+ const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='sira_data_backup.json';a.click();
+ toast("📤 تم تصدير البيانات!");
+}
+function importData(){
+ const input=document.createElement('input');input.type='file';input.accept='.json';
+ input.onchange=e=>{
+   const file=e.target.files[0];
+   const reader=new FileReader();
+   reader.onload=ev=>{
+     try{
+       const data=JSON.parse(ev.target.result);
+       if(data.participants)localStorage.setItem("quiz_participants",JSON.stringify(data.participants));
+       if(data.profile)localStorage.setItem("sira_profile",JSON.stringify(data.profile));
+       if(data.shop)localStorage.setItem("sira_shop",JSON.stringify(data.shop));
+       if(data.challenges)Object.keys(data.challenges).forEach(k=>localStorage.setItem(k,JSON.stringify(data.challenges[k])));
+       toast("📥 تم استيراد البيانات بنجاح!");
+       location.reload();
+     }catch(e){toast("❌ خطأ في الملف")}
+   };
+   reader.readAsText(file);
+ };
+ input.click();
+}
+
+function shareResult(){
+ const p=getProfile();
+ const text=`🕌 مسابقة السيرة النبوية ﷺ\n${p.name} (${p.age} سنة) حصل على ${score} XP وأجاب عن ${correct}/${document.getElementById("resultTotal").textContent} بشكل صحيح!`;
+ try{
+   if(navigator.share) navigator.share({title:"مسابقة السيرة النبوية ﷺ",text});
+   else navigator.clipboard.writeText(text).then(()=>toast("📋 تم نسخ النتيجة"));
+ }catch(e){}
+}
+
+/* ================= UTILITIES ================= */
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+function hideAll(){["home","quiz","result","admin","shop"].forEach(id=>document.getElementById(id).classList.add("hidden"))}
+function goHome(){clearInterval(timer);hideAll();document.getElementById("home").classList.remove("hidden");renderProfile();renderStats()}
+function showAdmin(){hideAll();document.getElementById("admin").classList.remove("hidden")}
+function scrollToId(id){document.getElementById(id).scrollIntoView({behavior:"smooth",block:"center"})}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function installPwa(){toast("📱 افتح قائمة المتصفح واختر «إضافة إلى الشاشة الرئيسية»")}
+
+/* ================= COUNTDOWN ================= */
+function tickCountdown(){
+ const now=new Date();
+ const mid=new Date(now);mid.setHours(24,0,0,0);
+ let diff=Math.max(0,mid-now);
+ const h=String(Math.floor(diff/3600000)).padStart(2,"0");
+ diff%=3600000;
+ const m=String(Math.floor(diff/60000)).padStart(2,"0");
+ diff%=60000;
+ const s=String(Math.floor(diff/1000)).padStart(2,"0");
+ document.getElementById("countdown").textContent=`${h} : ${m} : ${s}`;
+}
+setInterval(tickCountdown,1000);tickCountdown();
+
+/* ================= MUSIC ================= */
+let audioCtx=null, musicTimer=null, musicOn=false;
+const melody=[261.63,293.66,329.63,392,329.63,293.66,261.63,392,440,392,329.63,293.66];
+function toggleMusic(){
+ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ if(musicOn){musicOn=false;clearInterval(musicTimer);document.getElementById("musicBtn").textContent="🎵";return}
+ musicOn=true;document.getElementById("musicBtn").textContent="🔇";let i=0;
+ const play=()=>{if(!musicOn)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=melody[i++%melody.length];g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.035,audioCtx.currentTime+.03);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.42);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.45)};
+ play();musicTimer=setInterval(play,500);
+}
+document.getElementById("musicBtn").onclick=toggleMusic;
+
+/* ================= INIT ================= */
+renderLevels();
+const p=getProfile();
+if(p.name && p.age){
+ document.getElementById("loginModal").style.display = "none";
+ renderProfile();
+ renderLeaderboard('all');
+ renderStats();
+} else {
+ document.getElementById("loginModal").style.display = "flex";
+}
+newChallengeCode();
+document.getElementById("notifCount").textContent = getParticipants().length > 0 ? getParticipants().length : '0';
 </script>
 </body>
-</html>
+  </html>
