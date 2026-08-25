@@ -1,4 +1,4 @@
-<!doctype html>
+```htm<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
@@ -81,6 +81,7 @@ body{
 .btn.danger{background:var(--bad);color:#fff}
 .btn.small{padding:8px 14px;font-size:13px}
 .btn.good{background:var(--good);color:#fff}
+.btn.share{background:linear-gradient(135deg,#25D366,#128C7E);color:#fff}
 
 .statbar{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:14px}
 .statbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 8px;text-align:center}
@@ -220,6 +221,20 @@ input:focus,select:focus{outline:2px solid var(--gold);border-color:var(--gold)}
 /* Developer credit */
 .dev-credit{position:fixed;bottom:10px;right:10px;font-size:10px;color:var(--muted);opacity:0.5;z-index:20;background:#00000066;padding:4px 10px;border-radius:99px}
 .dev-credit span{color:var(--gold)}
+
+/* Invite banner */
+.invite-banner{background:linear-gradient(135deg,#1a3a2a,#0e241a);border:2px solid var(--gold);border-radius:16px;padding:14px 20px;margin:10px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.invite-banner .ic{font-size:28px}
+.invite-banner .text{flex:1}
+.invite-banner .text b{color:var(--gold)}
+.invite-banner .btn{font-size:13px;padding:8px 16px}
+
+.share-icons{display:flex;gap:6px;flex-wrap:wrap}
+.share-icons button{background:var(--card2);border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--ivory)}
+.share-icons button:hover{border-color:var(--gold)}
+.share-icons .wa{background:#25D366;border-color:#128C7E;color:#fff}
+.share-icons .tw{background:#1DA1F2;border-color:#0d8bd9;color:#fff}
+.share-icons .fb{background:#1877F2;border-color:#0d65d9;color:#fff}
 </style>
 </head>
 <body>
@@ -230,7 +245,7 @@ input:focus,select:focus{outline:2px solid var(--gold);border-color:var(--gold)}
   <div class="modal-box">
     <div style="font-size:52px">🕌</div>
     <h1>مرحباً بك!</h1>
-    <p>أدخل اسمك وعمرك لبدء رحلة السيرة النبوية ﷺ</p>
+    <p id="loginGreeting">أدخل اسمك وعمرك لبدء رحلة السيرة النبوية ﷺ</p>
     <input id="loginName" placeholder="الاسم الكامل أو المستعار" maxlength="30">
     <input id="loginAge" type="number" placeholder="العمر" min="6" max="120">
     <select id="loginCountry">
@@ -333,6 +348,21 @@ input:focus,select:focus{outline:2px solid var(--gold);border-color:var(--gold)}
         <button class="btn secondary" onclick="scrollToId('challengeFriend')">⚔️ تحدَّ صديقك</button>
       </div>
     </section>
+
+    <!-- Invite Banner (يظهر بعد تسجيل الدخول) -->
+    <div id="inviteBanner" class="invite-banner hidden">
+      <span class="ic">📨</span>
+      <div class="text">
+        <b>ادعُ أصدقاءك واربح نقاطاً إضافية!</b>
+        <span class="muted" style="font-size:13px;display:block">شارك رابطك الخاص، كل من يسجل عبرك يمنحك +50 XP</span>
+      </div>
+      <div class="share-icons">
+        <button class="wa" onclick="shareInvite('wa')">واتساب</button>
+        <button class="tw" onclick="shareInvite('tw')">تويتر</button>
+        <button class="fb" onclick="shareInvite('fb')">فيسبوك</button>
+        <button onclick="copyInviteLink()">📋 نسخ الرابط</button>
+      </div>
+    </div>
 
     <section class="statbar">
       <div class="statbox"><b id="statTotalPlayers">0</b><span>مشارك إجمالي</span></div>
@@ -530,7 +560,7 @@ input:focus,select:focus{outline:2px solid var(--gold);border-color:var(--gold)}
         <div id="compareResult"></div>
       </div>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">
-        <button class="btn" onclick="shareResult()">📤 مشاركة نتيجتي</button>
+        <button class="btn share" onclick="shareResult()">📤 مشاركة نتيجتي</button>
         <button class="btn secondary" onclick="openQuiz('normal')">العب من جديد</button>
         <button class="btn ghost" onclick="goHome()">الرئيسية</button>
       </div>
@@ -718,6 +748,74 @@ let shopItems = JSON.parse(localStorage.getItem("sira_shop")||JSON.stringify({
   '5050':3,'hint':3,'time':3,'skip':2,'theme':0,'title':0
 }));
 
+// ================= INVITE SYSTEM =================
+function getInviteCode(){
+ const p=getProfile();
+ return p.name ? btoa(p.name+':'+p.age) : '';
+}
+
+function getInviteLink(){
+ const code=getInviteCode();
+ if(!code) return window.location.href;
+ return window.location.href.split('?')[0] + '?ref=' + code;
+}
+
+function handleInvite(){
+ const urlParams = new URLSearchParams(window.location.search);
+ const ref = urlParams.get('ref');
+ if(ref){
+   try{
+     const decoded = atob(ref);
+     const parts = decoded.split(':');
+     if(parts.length===2){
+       const inviterName = parts[0];
+       const inviterAge = parseInt(parts[1]);
+       if(inviterName && inviterAge){
+         // Show a greeting in the login modal
+         document.getElementById('loginGreeting').innerHTML = `مرحباً! دعاك <b>${inviterName}</b> (${inviterAge} سنة) للمشاركة في المسابقة 🎉<br>سجل بياناتك وابدأ اللعب!`;
+         // Store inviter data to reward later
+         localStorage.setItem('sira_inviter', JSON.stringify({name:inviterName, age:inviterAge}));
+       }
+     }
+   }catch(e){}
+ }
+}
+
+function shareInvite(platform){
+ const link = getInviteLink();
+ const p=getProfile();
+ const text = `🕌 انضم لمسابقة السيرة النبوية معي!\n${p.name} يدعوك للعب وتحدي معلوماتك عن النبي ﷺ.\nرابط الدعوة: ${link}`;
+ if(platform==='wa') window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+ else if(platform==='tw') window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text),'_blank');
+ else if(platform==='fb') window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(link)+'&quote='+encodeURIComponent(text),'_blank');
+ else copyInviteLink();
+}
+
+function copyInviteLink(){
+ const link=getInviteLink();
+ navigator.clipboard?.writeText(link).then(()=>toast('📋 تم نسخ رابط الدعوة!')).catch(()=>toast('انسخ الرابط: '+link));
+}
+
+function rewardInviter(){
+ const inviterData = localStorage.getItem('sira_inviter');
+ if(inviterData){
+   try{
+     const data = JSON.parse(inviterData);
+     // Only reward once per session
+     if(!sessionStorage.getItem('sira_rewarded')){
+       const p = getProfile();
+       if(p.name && p.name !== data.name){ // avoid self-invite
+         p.xp = (p.xp||0) + 50;
+         saveProfile(p);
+         toast(`🎉 تمت إضافة 50 XP كهدية دعوة من ${data.name}!`);
+         sessionStorage.setItem('sira_rewarded','true');
+       }
+       localStorage.removeItem('sira_inviter');
+     }
+   }catch(e){}
+ }
+}
+
 /* ================= LOGIN ================= */
 function loginUser(){
  const nameElem = document.getElementById("loginName");
@@ -753,6 +851,10 @@ function loginUser(){
  renderProfile();
  renderStats();
  toast("🎉 مرحباً بك "+name+"!");
+ // Show invite banner
+ document.getElementById('inviteBanner').classList.remove('hidden');
+ // Reward inviter if any
+ rewardInviter();
 }
 
 document.addEventListener("keydown", function(e) {
@@ -1194,7 +1296,10 @@ function shareResult(){
  const text=`🕌 مسابقة السيرة النبوية ﷺ\n${p.name} (${p.age} سنة) حصل على ${score} XP وأجاب عن ${correct}/${document.getElementById("resultTotal").textContent} بشكل صحيح!`;
  try{
    if(navigator.share) navigator.share({title:"مسابقة السيرة النبوية ﷺ",text});
-   else navigator.clipboard.writeText(text).then(()=>toast("📋 تم نسخ النتيجة"));
+   else {
+     // Copy to clipboard and also show share options
+     navigator.clipboard.writeText(text).then(()=>toast("📋 تم نسخ النتيجة، شاركها مع أصدقائك!"));
+   }
  }catch(e){}
 }
 
@@ -1234,6 +1339,7 @@ function toggleMusic(){
 document.getElementById("musicBtn").onclick=toggleMusic;
 
 /* ================= INIT ================= */
+handleInvite(); // Check for invite link param
 renderLevels();
 const p=getProfile();
 if(p.name && p.age){
@@ -1241,6 +1347,8 @@ if(p.name && p.age){
  renderProfile();
  renderLeaderboard('all');
  renderStats();
+ document.getElementById('inviteBanner').classList.remove('hidden');
+ rewardInviter();
 } else {
  document.getElementById("loginModal").style.display = "flex";
 }
@@ -1248,4 +1356,4 @@ newChallengeCode();
 document.getElementById("notifCount").textContent = getParticipants().length > 0 ? getParticipants().length : '0';
 </script>
 </body>
-</html
+</html> 
